@@ -1,44 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WNC15.Controllers
 {
+    // Controller quản lý Trang chủ và các trang cơ bản
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        // 1. Trang chủ chính (đường dẫn: / hoặc /Home/Index)
+        public IActionResult Index()
         {
-            _logger = logger;
+            return View(); // Trả về giao diện Views/Home/Index.cshtml
         }
 
-        // GET: /
-        // GET: /Home/Index
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            // TODO: Lấy dữ liệu cho trang chủ:
-            // - Bài viết / Tin tức mới nhất
-            // - Các sự kiện sắp diễn ra của Hiệp hội
-            await Task.CompletedTask;
-            return View();
-        }
-
-        // GET: /Home/About
-        [HttpGet]
+        // 2. Trang giới thiệu về Hiệp hội (đường dẫn: /Home/About)
         public IActionResult About()
         {
-            // Trang giới thiệu chung về Hiệp hội, tôn chỉ và ban điều hành
-            return View();
+            return View(); // Trả về giao diện giới thiệu
         }
 
-        // GET: /Home/Search
-        [HttpGet]
-        public async Task<IActionResult> Search(string? query)
+        // 3. Trang chính sách bảo mật (đường dẫn: /Home/Privacy)
+        public IActionResult Privacy()
         {
-            ViewBag.SearchQuery = query;
-
-            // TODO: Tìm kiếm cơ bản trên website (tin tức, sự kiện)
-            await Task.CompletedTask;
             return View();
         }
     }

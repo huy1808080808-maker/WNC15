@@ -1,0 +1,100 @@
+﻿@model IEnumerable<WNC15.Models.DangKySuKien>
+@{
+    ViewData["Title"] = "Danh sách hội viên đăng ký tham gia";
+    var tenSuKien = ViewBag.TenSuKien as string ?? "Hội thảo Khoa học";
+    var maSuKien = ViewBag.MaSuKien ?? 1;
+    var tongSo = Model?.Count() ?? 0;
+}
+
+<div class="py-3">
+    <!-- Tiêu đề trang thuần tiếng Việt -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill text-primary me-2"></i>Danh Sách Hội Viên Đăng Ký Tham Gia
+            </h3>
+            <p class="text-muted small mb-0">Tên sự kiện: <strong>@tenSuKien</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Event" asp-action="ChiTiet" asp-route-id="@maSuKien" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-eye me-1"></i> Xem sự kiện
+            </a>
+            <a asp-controller="Event" asp-action="DanhSachSuKien" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Về lịch sự kiện
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <!-- Tổng số lượng người tham gia theo CSDL -->
+            <h6 class="fw-bold mb-0 text-secondary">
+                Tổng số lượng đã đăng ký: <span class="badge bg-primary fs-6 px-3 py-1">@tongSo người</span>
+            </h6>
+            <button class="btn btn-sm btn-outline-success" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> In danh sách này
+            </button>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary small">
+                        <tr>
+                            <th class="ps-4">Số thứ tự</th>
+                            <th>Họ và Tên Hội Viên</th>
+                            <th>Thư Điện Tử (Email)</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Cơ Quan / Đơn Vị Công Tác</th>
+                            <th>Thời Gian Đăng Ký</th>
+                            <th class="text-center pe-4">Trạng Thái Tham Gia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        @{
+                            int stt = 1;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@(stt++)</td>
+                                <td>
+                                    <strong class="text-dark">@(item.NguoiDung?.HoTen ?? "Hội viên")</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">@(item.NguoiDung?.ChucDanh ?? "Chuyên gia")</div>
+                                </td>
+                                <td>@(item.NguoiDung?.Email ?? "Chưa cập nhật")</td>
+                                <td>@(item.NguoiDung?.SoDienThoai ?? "Chưa cập nhật")</td>
+                                <td>@(item.NguoiDung?.DonViCongTac ?? "Chưa cập nhật")</td>
+                                <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-center pe-4">
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i>Đã xác nhận giữ chỗ
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Thông báo khi chưa có người nào đăng ký -->
+            <div class="text-center py-5">
+                <div class="bg-light text-muted rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="bi bi-person-x fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Chưa có hội viên nào đăng ký tham gia</h5>
+                <p class="text-muted small mb-3">Khi có hội viên bấm nút "Đăng ký tham gia", danh sách này sẽ tự động cập nhật ngay lập tức.</p>
+                <form asp-controller="Event" asp-action="DangKyThamGia" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@maSuKien" />
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-hand-index-thumb me-1"></i> Bấm để Đăng ký tham gia thử nghiệm
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

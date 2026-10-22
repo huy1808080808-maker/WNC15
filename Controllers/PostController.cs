@@ -1,123 +1,56 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WNC15.Controllers
 {
+    // Controller quản lý Tin tức và Bài viết
     public class PostController : Controller
     {
-        private readonly ILogger<PostController> _logger;
-
-        public PostController(ILogger<PostController> logger)
+        // 1. Danh sách tin tức (GET: /Post/DanhSachTinTuc)
+        public IActionResult DanhSachTinTuc()
         {
-            _logger = logger;
+            return View(); // Trả về Views/Post/DanhSachTinTuc.cshtml
         }
 
-        // GET: /Post
-        // GET: /Post/Index
-        [HttpGet]
-        public async Task<IActionResult> Index(string? search, int? categoryId, int page = 1)
+        // 2. Chi tiết một bài viết (GET: /Post/ChiTiet/5)
+        public IActionResult ChiTiet(int id)
         {
-            ViewBag.SearchTerm = search;
-            ViewBag.CategoryId = categoryId;
-            ViewBag.CurrentPage = page;
-
-            // TODO: Nghiệp vụ P02 - Lấy danh sách tin tức có tìm kiếm, lọc theo danh mục và phân trang
-            await Task.CompletedTask;
-            return View();
+            return View(); // Trả về Views/Post/ChiTiet.cshtml
         }
 
-        // GET: /Post/Details/5
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        // 3. Mở form đăng bài viết mới (GET: /Post/ThemTinTuc)
+        public IActionResult ThemTinTuc()
         {
-            if (id <= 0)
-            {
-                return NotFound();
-            }
-
-            // TODO: Nghiệp vụ P02 - Xem chi tiết nội dung bài viết, tác giả, ngày đăng, lượt xem
-            await Task.CompletedTask;
-            return View();
+            return View(); // Trả về Views/Post/ThemTinTuc.cshtml
         }
 
-        // GET: /Post/Create (Dành cho Admin)
-        [HttpGet]
-        public IActionResult Create()
-        {
-            // TODO: Kiểm tra quyền Admin (hoặc [Authorize(Roles = "Admin")])
-            // Lấy danh sách chuyên mục tin tức để đổ vào dropdown
-            return View();
-        }
-
-        // POST: /Post/Create (Dành cho Admin - BM04)
+        // 4. Xử lý lưu bài viết mới (POST: /Post/ThemTinTuc)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string title, string summary, string content, int categoryId, IFormFile? thumbnail)
+        public IActionResult ThemTinTuc(string title, string content)
         {
-            // TODO: Kiểm tra quyền Admin
-            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
-            {
-                ModelState.AddModelError(string.Empty, "Tiêu đề và nội dung bài viết không được để trống.");
-                return View();
-            }
-
-            // TODO: Nghiệp vụ P02 - Tạo bài viết mới kèm upload ảnh đại diện theo biểu mẫu BM04:
-            // 1. Upload file ảnh đại diện (thumbnail) vào thư mục /uploads/posts/
-            // 2. Lưu bài viết vào CSDL với trạng thái đã xuất bản
-            await Task.CompletedTask;
-
-            TempData["SuccessMessage"] = "Đăng tin tức mới thành công!";
-            return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "Đăng bài viết mới thành công!";
+            return RedirectToAction("DanhSachTinTuc");
         }
 
-        // GET: /Post/Edit/5 (Dành cho Admin)
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        // 5. Mở form chỉnh sửa bài viết (GET: /Post/ChinhSua/5)
+        public IActionResult ChinhSua(int id)
         {
-            // TODO: Kiểm tra quyền Admin
-            if (id <= 0)
-            {
-                return NotFound();
-            }
-
-            // TODO: Lấy thông tin bài viết theo id để hiển thị lên form chỉnh sửa
-            await Task.CompletedTask;
-            return View();
+            return View(); // Trả về Views/Post/ChinhSua.cshtml
         }
 
-        // POST: /Post/Edit/5 (Dành cho Admin)
+        // 6. Xử lý cập nhật bài viết (POST: /Post/ChinhSua)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string title, string summary, string content, int categoryId, IFormFile? thumbnail)
+        public IActionResult ChinhSua(int id, string title, string content)
         {
-            // TODO: Kiểm tra quyền Admin
-            if (id <= 0)
-            {
-                return BadRequest();
-            }
-
-            // TODO: Nghiệp vụ P02 - Cập nhật bài viết và thay thế ảnh đại diện mới nếu có upload
-            await Task.CompletedTask;
-
             TempData["SuccessMessage"] = "Cập nhật bài viết thành công!";
-            return RedirectToAction(nameof(Details), new { id });
+            return RedirectToAction("DanhSachTinTuc");
         }
 
-        // POST: /Post/Delete/5 (Dành cho Admin)
+        // 7. Xóa bài viết (POST: /Post/XoaTinTuc)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult XoaTinTuc(int id)
         {
-            // TODO: Kiểm tra quyền Admin
-            if (id <= 0)
-            {
-                return BadRequest();
-            }
-
-            // TODO: Nghiệp vụ P02 - Xóa bài viết khỏi cơ sở dữ liệu
-            await Task.CompletedTask;
-
-            TempData["SuccessMessage"] = "Đã xóa bài viết thành công.";
-            return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "Đã xóa bài viết thành công!";
+            return RedirectToAction("DanhSachTinTuc");
         }
     }
 }

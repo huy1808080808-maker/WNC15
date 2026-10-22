@@ -1,8 +1,129 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ - Cổng thông tin Hiệp hội";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- KHỐI BANNER CHÀO MỪNG / GIỚI THIỆU -->
+<div class="p-5 mb-4 bg-white rounded-4 shadow-sm border">
+    <div class="container-fluid py-3">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold mb-3">
+                    <i class="bi bi-patch-check-fill me-1"></i> Cổng thông tin chính thức
+                </span>
+                <h1 class="display-5 fw-bold text-dark mb-3">HIỆP HỘI KHOA HỌC & CÔNG NGHỆ</h1>
+                <p class="col-md-11 fs-5 text-secondary mb-4">
+                    Nơi quy tụ đội ngũ chuyên gia, nhà khoa học và các hội viên trong lĩnh vực công nghệ. Kết nối nghiên cứu, chia sẻ tri thức và cùng nhau kiến tạo các giá trị phát triển bền vững.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a class="btn btn-warning btn-lg px-4 fw-semibold text-dark shadow-sm" asp-controller="Auth" asp-action="DangKy">
+                        <i class="bi bi-file-earmark-person me-2"></i>Đăng ký gia nhập ngay
+                    </a>
+                    <a class="btn btn-outline-primary btn-lg px-4 fw-semibold" asp-controller="Event" asp-action="DanhSachSuKien">
+                        <i class="bi bi-calendar-event me-2"></i>Xem lịch sự kiện
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-5 shadow-sm">
+                    <i class="bi bi-award-fill" style="font-size: 7rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KHỐI THỐNG KÊ NHANH -->
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-people-fill text-primary fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-1">500+</h3>
+                <p class="text-muted mb-0">Hội viên chính thức</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-calendar-check-fill text-success fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-1">50+</h3>
+                <p class="text-muted mb-0">Hội thảo & Sự kiện chuyên môn</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-journal-richtext text-warning fs-1 mb-2"></i>
+                <h3 class="fw-bold mb-1">200+</h3>
+                <p class="text-muted mb-0">Bài viết & Công trình nghiên cứu</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KHỐI TIN TỨC & SỰ KIỆN NỔI BẬT -->
+<div class="row g-4 mb-4">
+    <!-- Cột Tin tức -->
+    <div class="col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-newspaper text-primary me-2"></i>Tin tức mới nhất
+            </h4>
+            <a asp-controller="Post" asp-action="DanhSachTinTuc" class="text-decoration-none small fw-semibold text-primary">
+                Xem tất cả <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        <div class="card border-0 shadow-sm rounded-4 p-3">
+            <div class="list-group list-group-flush">
+                <div class="list-group-item border-bottom py-3 px-2">
+                    <span class="badge bg-primary-subtle text-primary mb-1">Thông báo</span>
+                    <h6 class="fw-bold mb-1">Kế hoạch tổ chức Đại hội Hội viên thường niên năm 2026</h6>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>Hôm nay</small>
+                </div>
+                <div class="list-group-item border-bottom py-3 px-2">
+                    <span class="badge bg-success-subtle text-success mb-1">Nghiên cứu</span>
+                    <h6 class="fw-bold mb-1">Công bố các đề tài nghiên cứu trọng điểm giai đoạn mới</h6>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>2 ngày trước</small>
+                </div>
+                <div class="list-group-item py-3 px-2">
+                    <span class="badge bg-warning-subtle text-warning mb-1">Hội viên</span>
+                    <h6 class="fw-bold mb-1">Hướng dẫn hoàn thiện hồ sơ đăng ký thành viên mới</h6>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>3 ngày trước</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Sự kiện -->
+    <div class="col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-calendar-event text-primary me-2"></i>Sự kiện sắp diễn ra
+            </h4>
+            <a asp-controller="Event" asp-action="DanhSachSuKien" class="text-decoration-none small fw-semibold text-primary">
+                Xem tất cả <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        <div class="card border-0 shadow-sm rounded-4 p-3">
+            <div class="list-group list-group-flush">
+                <div class="list-group-item border-bottom py-3 px-2">
+                    <span class="badge bg-danger mb-1">Sắp diễn ra</span>
+                    <h6 class="fw-bold mb-1">Hội thảo Khoa học Quốc tế về Trí tuệ nhân tạo và Ứng dụng</h6>
+                    <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>Hội trường A, Tòa nhà Hiệp hội</small>
+                </div>
+                <div class="list-group-item border-bottom py-3 px-2">
+                    <span class="badge bg-info text-dark mb-1">Đang mở đăng ký</span>
+                    <h6 class="fw-bold mb-1">Tọa đàm Gặp gỡ và Kết nối Hội viên Quý 1</h6>
+                    <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>Phòng Hội thảo trực tuyến</small>
+                </div>
+                <div class="list-group-item py-3 px-2">
+                    <span class="badge bg-secondary mb-1">Tập huấn</span>
+                    <h6 class="fw-bold mb-1">Khóa bồi dưỡng kỹ năng công bố bài báo khoa học chuẩn quốc tế</h6>
+                    <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>Trung tâm Đào tạo Hiệp hội</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

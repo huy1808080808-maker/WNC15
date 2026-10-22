@@ -1,4 +1,4 @@
-namespace WNC15.Models
+﻿namespace WNC15.Models
 {
     public class ErrorViewModel
     {

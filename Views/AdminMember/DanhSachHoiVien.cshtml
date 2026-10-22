@@ -1,0 +1,177 @@
+﻿@{
+    ViewData["Title"] = "Quản lý toàn bộ hội viên";
+}
+
+<div class="py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill text-primary me-2"></i>Quản Lý Hội Viên
+            </h2>
+            <p class="text-muted small mb-0">Theo dõi thông tin, phân quyền và quản lý trạng thái hoạt động của hội viên</p>
+        </div>
+        <div>
+            <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-warning fw-semibold text-dark shadow-sm">
+                <i class="bi bi-shield-lock-fill me-1"></i> Hồ sơ chờ duyệt (2)
+            </a>
+        </div>
+    </div>
+
+    <!-- Thanh tìm kiếm và bộ lọc hội viên -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <form asp-controller="AdminMember" asp-action="DanhSachHoiVien" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" class="form-control bg-light border-start-0" placeholder="Tìm kiếm theo họ tên, email hoặc đơn vị công tác..." />
+                    </div>
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="bi bi-funnel me-1"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bảng danh sách hội viên -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small">
+                    <tr>
+                        <th class="ps-4">Hội Viên</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Cơ Quan / Đơn Vị</th>
+                        <th>Chức Danh & Lĩnh Vực</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                    <!-- Hội viên 1: Đang hoạt động -->
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-circle fs-3 text-primary"></i>
+                                <div>
+                                    <strong class="text-dark d-block">Nguyễn Văn An</strong>
+                                    <span class="text-muted small">nguyenvanan@gmail.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>0912 345 678</td>
+                        <td>Trường Đại học Bách Khoa</td>
+                        <td>
+                            <div>Tiến sĩ / Giảng viên</div>
+                            <small class="text-muted">Khoa học máy tính</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success px-3 py-2">Đang hoạt động</span>
+                        </td>
+                        <td class="text-center pe-4">
+                            <div class="d-flex justify-content-center gap-1">
+                                <form asp-controller="AdminMember" asp-action="KhoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="1" />
+                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Khóa tài khoản" onclick="return confirm('Bạn có muốn khóa tài khoản này?');">
+                                        <i class="bi bi-lock-fill"></i> Khóa
+                                    </button>
+                                </form>
+                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="1" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Hội viên 2: Đang hoạt động -->
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-circle fs-3 text-success"></i>
+                                <div>
+                                    <strong class="text-dark d-block">Trần Thị Bình</strong>
+                                    <span class="text-muted small">tranbinh@viennghiencuu.vn</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>0987 654 321</td>
+                        <td>Viện Công nghệ & ĐMST</td>
+                        <td>
+                            <div>Chuyên gia dữ liệu</div>
+                            <small class="text-muted">AI & Big Data</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success px-3 py-2">Đang hoạt động</span>
+                        </td>
+                        <td class="text-center pe-4">
+                            <div class="d-flex justify-content-center gap-1">
+                                <form asp-controller="AdminMember" asp-action="KhoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="2" />
+                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Khóa tài khoản" onclick="return confirm('Bạn có muốn khóa tài khoản này?');">
+                                        <i class="bi bi-lock-fill"></i> Khóa
+                                    </button>
+                                </form>
+                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="2" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Hội viên 3: Bị tạm khóa -->
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-circle fs-3 text-secondary"></i>
+                                <div>
+                                    <strong class="text-dark d-block">Lê Minh Đức</strong>
+                                    <span class="text-muted small">duc.le@company.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>0903 999 888</td>
+                        <td>Công ty Công nghệ Alpha</td>
+                        <td>
+                            <div>Kỹ sư</div>
+                            <small class="text-muted">An ninh mạng</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-danger-subtle text-danger px-3 py-2">Đang bị khóa</span>
+                        </td>
+                        <td class="text-center pe-4">
+                            <div class="d-flex justify-content-center gap-1">
+                                <form asp-controller="AdminMember" asp-action="MoKhoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="3" />
+                                    <button type="submit" class="btn btn-outline-success btn-sm" title="Mở khóa tài khoản">
+                                        <i class="bi bi-unlock-fill"></i> Mở khóa
+                                    </button>
+                                </form>
+                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="3" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

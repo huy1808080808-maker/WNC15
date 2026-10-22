@@ -1,0 +1,106 @@
+﻿@model WNC15.Models.SuKien
+@{
+    ViewData["Title"] = "Chi tiết sự kiện & Đăng ký tham gia";
+    var maSuKien = Model?.MaSuKien ?? 1;
+    var tenSuKien = Model?.TenSuKien ?? "Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo & Dữ liệu";
+    var diaDiem = Model?.DiaDiem ?? "Hội trường A, Tòa nhà Hiệp hội";
+    var thoiGian = Model != null && Model.ThoiGianToChuc != default ? Model.ThoiGianToChuc.ToString("dd/MM/yyyy HH:mm") : "15/11/2026 08:30";
+    var soLuongToiDa = Model?.SoLuongToiDa ?? 100;
+    var soLuongDaDangKy = Model?.DangKySuKiens?.Count ?? 0;
+    var soChoConLai = soLuongToiDa - soLuongDaDangKy;
+    if (soChoConLai < 0) soChoConLai = 0;
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9 col-md-11">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Event" asp-action="DanhSachSuKien" class="text-decoration-none">Sự kiện</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Chi tiết sự kiện</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="bg-primary text-white p-4 p-md-5">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold mb-2">Đang mở đăng ký</span>
+                <h2 class="fw-bold mb-2">@tenSuKien</h2>
+                <p class="mb-0 text-white-50">Sự kiện khoa học và sinh hoạt chuyên môn của Hiệp hội</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <!-- Hộp thông số thời gian & địa điểm & số chỗ tự động tính toán -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center h-100">
+                            <i class="bi bi-calendar3 text-primary fs-3 mb-2 d-block"></i>
+                            <div class="small text-muted">Thời gian tổ chức</div>
+                            <strong class="text-dark">@thoiGian</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center h-100">
+                            <i class="bi bi-geo-alt-fill text-danger fs-3 mb-2 d-block"></i>
+                            <div class="small text-muted">Địa điểm tổ chức</div>
+                            <strong class="text-dark">@diaDiem</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center h-100">
+                            <i class="bi bi-people-fill text-success fs-3 mb-2 d-block"></i>
+                            <div class="small text-muted">Tình trạng chỗ ngồi</div>
+                            <!-- TỰ ĐỘNG CẬP NHẬT SỐ CHỖ THEO CSDL -->
+                            <strong class="text-success">Còn @soChoConLai / @soLuongToiDa chỗ</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nội dung sự kiện -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>Nội dung chương trình</h5>
+                <div class="text-secondary lh-lg mb-4">
+                    <p>
+                        @(Model?.MoTa ?? "Hội thảo nhằm mục đích tạo diễn đàn trao đổi học thuật chất lượng cao giữa các nhà khoa học, chuyên gia công nghệ và các hội viên trong cả nước.")
+                    </p>
+                    <ul>
+                        <li>Ứng dụng mô hình học máy lớn trong nghiên cứu và chuyển đổi số.</li>
+                        <li>Đạo đức và an toàn trong phát triển hệ thống công nghệ thông tin.</li>
+                        <li>Kết nối chuyển giao công nghệ giữa viện nghiên cứu và doanh nghiệp.</li>
+                    </ul>
+                </div>
+
+                <!-- Khu vực nút Đăng ký tham gia -->
+                <div class="p-4 bg-light rounded-4 border d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Đăng ký tham dự ngay hôm nay</h6>
+                        <small class="text-muted">Đã có <strong>@soLuongDaDangKy người</strong> đăng ký tham dự sự kiện này.</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form asp-controller="Event" asp-action="DangKyThamGia" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@maSuKien" />
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Xác nhận Đăng ký tham gia
+                            </button>
+                        </form>
+                        <form asp-controller="Event" asp-action="HuyDangKy" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@maSuKien" />
+                            <button type="submit" class="btn btn-outline-danger px-3 py-2" onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này?');">
+                                <i class="bi bi-x-circle me-1"></i> Hủy đăng ký
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-top mt-4 d-flex justify-content-between align-items-center">
+                    <a asp-controller="Event" asp-action="DanhSachSuKien" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách sự kiện
+                    </a>
+                    <a asp-controller="Event" asp-action="DanhSachDiemDanh" asp-route-id="@maSuKien" class="btn btn-outline-primary">
+                        <i class="bi bi-card-checklist me-1"></i> Xem danh sách điểm danh (@soLuongDaDangKy)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

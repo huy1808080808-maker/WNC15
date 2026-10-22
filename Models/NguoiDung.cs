@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WNC15.Models
@@ -37,7 +37,7 @@ namespace WNC15.Models
         [StringLength(100)]
         public string? LinhVuc { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
         [Column("mat_khau_ma_hoa")]
         [StringLength(255)]
         public string MatKhauMaHoa { get; set; } = string.Empty;

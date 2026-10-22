@@ -1,0 +1,137 @@
+﻿@{
+    ViewData["Title"] = "Tin tức & Hoạt động chuyên môn";
+}
+
+<div class="py-3">
+    <!-- Tiêu đề trang & Nút Đăng bài cho Quản trị viên -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-newspaper text-primary me-2"></i>Tin Tức & Hoạt Động
+            </h2>
+            <p class="text-muted small mb-0">Cập nhật các công trình nghiên cứu, thông báo và hoạt động học thuật mới nhất</p>
+        </div>
+        <div>
+            <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Đăng bài viết mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Thanh tìm kiếm và bộ lọc chuyên mục -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <form asp-controller="Post" asp-action="DanhSachTinTuc" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control bg-light border-start-0" placeholder="Nhập từ khóa tìm kiếm bài viết..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select bg-light" name="categoryId">
+                        <option value="">Tất cả chuyên mục</option>
+                        <option value="1">Nghiên cứu & Công nghệ</option>
+                        <option value="2">Thông báo Hiệp hội</option>
+                        <option value="3">Sinh hoạt Hội viên</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary fw-semibold">
+                        <i class="bi bi-funnel me-1"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danh sách bài viết dạng lưới Card -->
+    <div class="row g-4 mb-4">
+        <!-- Bài viết mẫu 1 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-primary bg-opacity-10 text-primary text-center py-5">
+                    <i class="bi bi-cpu fs-1"></i>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary-subtle text-primary">Nghiên cứu & Công nghệ</span>
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>Hôm nay</small>
+                    </div>
+                    <h5 class="fw-bold mb-2">
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="1" class="text-dark text-decoration-none">
+                            Xu hướng ứng dụng Trí tuệ nhân tạo trong chuyển đổi số doanh nghiệp
+                        </a>
+                    </h5>
+                    <p class="text-secondary small flex-grow-1">
+                        Tổng hợp các báo cáo khoa học mới nhất về giải pháp tối ưu hóa năng suất làm việc và tự động hóa quy trình...
+                    </p>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-person me-1"></i>Ban Thư Ký</small>
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="1" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bài viết mẫu 2 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-success bg-opacity-10 text-success text-center py-5">
+                    <i class="bi bi-megaphone fs-1"></i>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-success-subtle text-success">Thông báo Hiệp hội</span>
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>2 ngày trước</small>
+                    </div>
+                    <h5 class="fw-bold mb-2">
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="2" class="text-dark text-decoration-none">
+                            Kế hoạch tổ chức Đại hội Hội viên thường niên nhiệm kỳ 2026 - 2030
+                        </a>
+                    </h5>
+                    <p class="text-secondary small flex-grow-1">
+                        Ban Chấp hành Hiệp hội thông báo triệu tập Đại hội nhằm tổng kết nhiệm kỳ qua và bầu ra Ban điều hành mới...
+                    </p>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-person me-1"></i>Ban Chấp Hành</small>
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="2" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bài viết mẫu 3 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-warning bg-opacity-10 text-warning text-center py-5">
+                    <i class="bi bi-journal-code fs-1"></i>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-warning-subtle text-dark">Sinh hoạt Hội viên</span>
+                        <small class="text-muted"><i class="bi bi-clock me-1"></i>4 ngày trước</small>
+                    </div>
+                    <h5 class="fw-bold mb-2">
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="3" class="text-dark text-decoration-none">
+                            Kêu gọi gửi công trình nghiên cứu và đề tài tham gia giải thưởng thường niên
+                        </a>
+                    </h5>
+                    <p class="text-secondary small flex-grow-1">
+                        Chương trình vinh danh các nhà khoa học, hội viên có nhiều đóng góp xuất sắc trong việc phát triển khoa học công nghệ...
+                    </p>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-person me-1"></i>Hội Đồng Khoa Học</small>
+                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="3" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

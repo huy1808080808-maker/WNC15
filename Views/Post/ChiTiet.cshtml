@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết bài viết";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9 col-md-11">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Post" asp-action="DanhSachTinTuc" class="text-decoration-none">Tin tức</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Nội dung chi tiết</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="mb-3">
+                    <span class="badge bg-primary px-3 py-2 rounded-pill">Nghiên cứu & Công nghệ</span>
+                </div>
+
+                <h2 class="fw-bold text-dark mb-3">
+                    Xu hướng ứng dụng Trí tuệ nhân tạo trong chuyển đổi số và nâng cao năng suất lao động
+                </h2>
+
+                <div class="d-flex flex-wrap align-items-center text-muted small pb-3 mb-4 border-bottom gap-3">
+                    <div><i class="bi bi-person-fill text-primary me-1"></i>Tác giả: <strong>Ban Thư Ký Hiệp Hội</strong></div>
+                    <div><i class="bi bi-calendar3 text-primary me-1"></i>Ngày đăng: 22/10/2026</div>
+                    <div><i class="bi bi-eye-fill text-primary me-1"></i>Lượt xem: 1,250</div>
+                </div>
+
+                <!-- Tóm tắt bài viết -->
+                <div class="p-3 bg-light rounded-3 border-start border-primary border-4 mb-4">
+                    <p class="fst-italic text-secondary mb-0">
+                        Bài viết tổng hợp các nghiên cứu mới nhất về ứng dụng Trí tuệ nhân tạo (AI) trong việc tự động hóa tác vụ, phân tích dữ liệu lớn và tối ưu hóa quy trình làm việc trong các cơ quan, viện nghiên cứu và doanh nghiệp.
+                    </p>
+                </div>
+
+                <!-- Nội dung chi tiết -->
+                <div class="article-content text-secondary lh-lg mb-4">
+                    <p>
+                        Trong bối cảnh kỷ nguyên số bùng nổ, việc nghiên cứu và ứng dụng trí tuệ nhân tạo (AI) đã không còn là xu hướng thử nghiệm mà trở thành một yêu cầu thực tiễn cấp bách. Các hội viên và nhà khoa học của Hiệp hội đã không ngừng đóng góp các sáng kiến, giải pháp công nghệ nhằm hỗ trợ thiết thực cho hoạt động của cộng đồng.
+                    </p>
+                    <h5 class="fw-bold text-dark mt-4 mb-3">1. Vai trò của việc ứng dụng mô hình ngôn ngữ lớn</h5>
+                    <p>
+                        Các mô hình xử lý ngôn ngữ tự nhiên hiện đại giúp rút ngắn đến 50% thời gian xử lý văn bản, tài liệu khoa học, hỗ trợ dịch thuật chuyên ngành và trích xuất thông tin tự động với độ chính xác cao.
+                    </p>
+                    <h5 class="fw-bold text-dark mt-4 mb-3">2. Định hướng hoạt động sắp tới của Hiệp hội</h5>
+                    <p>
+                        Ban Điều hành Hiệp hội sẽ tiếp tục mở các chuỗi tọa đàm, hội thảo học thuật chuyên đề và kết nối hội viên nhằm tạo điều kiện cho các nhà nghiên cứu cùng nhau chia sẻ dữ liệu, công bố bài báo và hợp tác thực hiện các đề tài trọng điểm.
+                    </p>
+                </div>
+
+                <div class="pt-4 border-top d-flex justify-content-between align-items-center">
+                    <a asp-controller="Post" asp-action="DanhSachTinTuc" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách tin tức
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> In bài viết
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

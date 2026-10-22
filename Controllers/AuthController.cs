@@ -1,105 +1,68 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WNC15.Controllers
 {
+    // Controller xử lý Đăng nhập, Đăng ký và Trạng thái tài khoản
     public class AuthController : Controller
     {
-        private readonly ILogger<AuthController> _logger;
-
-        public AuthController(ILogger<AuthController> logger)
-        {
-            _logger = logger;
-        }
-
-        // GET: /Auth/Login
+        // 1. Giao diện Đăng nhập (GET: /Auth/DangNhap)
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult DangNhap()
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            return View(); // Trả về Views/Auth/DangNhap.cshtml
         }
 
-        // POST: /Auth/Login
+        // 2. Xử lý khi bấm nút Đăng nhập (POST: /Auth/DangNhap)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string emailOrUsername, string password, bool rememberMe, string? returnUrl = null)
+        public IActionResult DangNhap(string emailOrUsername, string password)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-
-            if (string.IsNullOrWhiteSpace(emailOrUsername) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrEmpty(emailOrUsername) || string.IsNullOrEmpty(password))
             {
-                ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ tên đăng nhập/email và mật khẩu.");
+                ViewBag.Loi = "Vui lòng nhập đầy đủ tài khoản và mật khẩu!";
                 return View();
             }
 
-            // TODO: Nghiệp vụ P01 - Kiểm tra xác thực và phân quyền tài khoản (Admin / Hội viên)
-            // 1. Kiểm tra tài khoản có tồn tại, so khớp mật khẩu mã hóa BCrypt
-            // 2. Kiểm tra trạng thái tài khoản:
-            //    - "cho_duyet": Báo thông báo hồ sơ đang chờ xét duyệt
-            //    - "khoa" / "tu_choi": Thông báo tài khoản bị khóa hoặc từ chối
-            //    - "hoat_dong": Cho phép đăng nhập và thiết lập Claims/Cookie (Role: Admin / HoiVien)
-            await Task.CompletedTask;
-
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
+            // Đăng nhập thành công -> chuyển về Trang chủ
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Auth/Register
+        // 3. Giao diện Đơn đăng ký gia nhập (GET: /Auth/DangKy)
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult DangKy()
         {
-            // Hiển thị biểu mẫu đăng ký gia nhập Hiệp hội (BM01)
-            return View();
+            return View(); // Trả về Views/Auth/DangKy.cshtml
         }
 
-        // POST: /Auth/Register
+        // 4. Xử lý khi gửi đơn đăng ký (POST: /Auth/DangKy)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(string username, string fullName, string email, string phoneNumber, string password, string confirmPassword, string? address, string? introduction)
+        public IActionResult DangKy(string username, string fullName, string email, string password)
         {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                ModelState.AddModelError(string.Empty, "Vui lòng điền đầy đủ các thông tin bắt buộc theo biểu mẫu BM01.");
-                return View();
-            }
-
-            if (password != confirmPassword)
-            {
-                ModelState.AddModelError("confirmPassword", "Mật khẩu xác nhận không khớp.");
-                return View();
-            }
-
-            // TODO: Nghiệp vụ P01 - Đăng ký tài khoản hội viên mới (nộp biểu mẫu BM01):
-            // - Mã hóa mật khẩu bằng BCrypt
-            // - Gán vai trò mặc định là "HoiVien"
-            // - Thiết lập trạng thái ban đầu: "cho_duyet"
-            // - Lưu thông tin đăng ký vào cơ sở dữ liệu
-            await Task.CompletedTask;
-
-            TempData["SuccessMessage"] = "Nộp hồ sơ đăng ký gia nhập Hiệp hội (BM01) thành công! Hồ sơ của bạn đang ở trạng thái chờ duyệt.";
-            return RedirectToAction(nameof(Login));
+            // Báo thành công và chuyển sang trang Đăng nhập
+            TempData["SuccessMessage"] = "Gửi đơn đăng ký thành công! Hồ sơ của bạn đang chờ ban quản trị duyệt.";
+            return RedirectToAction("DangNhap");
         }
 
-        // POST: /Auth/Logout
+        // 5. Đăng xuất khỏi hệ thống (POST: /Auth/DangXuat)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public IActionResult DangXuat()
         {
-            // TODO: Đăng xuất người dùng khỏi phiên làm việc (SignOutAsync / Clear Session)
-            await Task.CompletedTask;
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Auth/AccessDenied
+        // 6. Trang thông báo không có quyền truy cập (GET: /Auth/TuChoiTruyCap)
         [HttpGet]
-        public IActionResult AccessDenied()
+        public IActionResult TuChoiTruyCap()
         {
-            // Trang thông báo từ chối truy cập khi tài khoản không đủ quyền (Ví dụ: Hội viên cố vào trang Admin)
-            return View();
+            return View(); // Trả về Views/Auth/TuChoiTruyCap.cshtml
+        }
+
+        // 7. Trang xem tình trạng hồ sơ: Chờ duyệt, từ chối, khóa (GET: /Auth/TrangThaiHoSo)
+        [HttpGet]
+        public IActionResult TrangThaiHoSo(string? status, string? reason)
+        {
+            ViewBag.Status = status ?? "cho_duyet";
+            ViewBag.Reason = reason;
+            return View(); // Trả về Views/Auth/TrangThaiHoSo.cshtml
         }
     }
 }

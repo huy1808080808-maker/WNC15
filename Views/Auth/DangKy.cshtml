@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Đơn đăng ký gia nhập Hiệp hội";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-8 col-md-10">
+        <!-- Thông báo quy trình phê duyệt -->
+        <div class="alert alert-info border-0 shadow-sm rounded-3 d-flex align-items-center mb-4">
+            <i class="bi bi-info-circle-fill fs-3 text-info me-3"></i>
+            <div>
+                <strong>Lưu ý về Quy trình xét duyệt hồ sơ:</strong>
+                <p class="mb-0 small">Sau khi hoàn tất gửi đơn đăng ký, hồ sơ của bạn sẽ được chuyển sang trạng thái <strong>"Chờ xét duyệt"</strong>. Ban Thư ký & Ban Quản Trị Hiệp hội sẽ tiến hành thẩm định thông tin trước khi kích hoạt tài khoản hội viên chính thức.</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="badge bg-primary px-3 py-1 mb-1">Gia nhập thành viên</span>
+                        <h4 class="fw-bold mb-0 text-dark">ĐƠN ĐĂNG KÝ GIA NHẬP HIỆP HỘI</h4>
+                        <small class="text-muted">Dành cho cá nhân có nguyện vọng tham gia sinh hoạt chuyên môn</small>
+                    </div>
+                    <i class="bi bi-award text-primary fs-1"></i>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Hiển thị lỗi tổng quát nếu có -->
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2 mb-4" role="alert"></div>
+
+                <form asp-controller="Auth" asp-action="DangKy" method="post" id="formRegister">
+                    @Html.AntiForgeryToken()
+
+                    <!-- PHẦN 1: THÔNG TIN TÀI KHOẢN ĐĂNG NHẬP -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2 mb-3">
+                            <i class="bi bi-shield-lock me-1"></i> 1. Thông tin tài khoản đăng nhập
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Tên đăng nhập <span class="text-danger">*</span></label>
+                                <input type="text" name="username" class="form-control" placeholder="Ví dụ: nguyenvana" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Hòm thư điện tử (Email) <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="Ví dụ: nguyenvana@gmail.com" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Mật khẩu khởi tạo <span class="text-danger">*</span></label>
+                                <input type="password" name="password" id="regPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Nhập lại mật khẩu để xác nhận <span class="text-danger">*</span></label>
+                                <input type="password" name="confirmPassword" id="regConfirmPassword" class="form-control" placeholder="Nhập lại chính xác mật khẩu trên" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 2: THÔNG TIN NHÂN THÂN & CÔNG TÁC -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2 mb-3">
+                            <i class="bi bi-person-lines-fill me-1"></i> 2. Thông tin nhân thân & Đơn vị công tác
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-semibold text-secondary">Họ và tên đầy đủ <span class="text-danger">*</span></label>
+                                <input type="text" name="fullName" class="form-control" placeholder="Ví dụ: NGUYỄN VĂN AN" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold text-secondary">Số điện thoại liên hệ <span class="text-danger">*</span></label>
+                                <input type="tel" name="phoneNumber" class="form-control" placeholder="Ví dụ: 0912345678" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Cơ quan / Đơn vị công tác</label>
+                                <input type="text" name="address" class="form-control" placeholder="Ví dụ: Trường Đại học Bách Khoa..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Chức vụ / Chức danh chuyên môn</label>
+                                <input type="text" name="jobTitle" class="form-control" placeholder="Ví dụ: Giảng viên, Chuyên gia phân tích, Kỹ sư..." />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Lĩnh vực chuyên môn / Hướng nghiên cứu</label>
+                                <input type="text" name="researchField" class="form-control" placeholder="Ví dụ: Trí tuệ nhân tạo, Hệ thống thông tin, Khoa học máy tính..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 3: GIỚI THIỆU & NGUYỆN VỌNG THAM GIA -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase border-bottom pb-2 mb-3">
+                            <i class="bi bi-chat-square-text me-1"></i> 3. Giới thiệu tóm tắt & Nguyện vọng tham gia
+                        </h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Tóm tắt quá trình công tác hoặc mục tiêu khi gia nhập Hiệp hội</label>
+                            <textarea name="introduction" rows="3" class="form-control" placeholder="Chia sẻ kinh nghiệm làm việc, nguyện vọng đóng góp và tham gia các hoạt động hội thảo chuyên môn của Hiệp hội..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- CAM KẾT -->
+                    <div class="form-check p-3 bg-light rounded-3 mb-4">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="termsCheck" required />
+                        <label class="form-check-label small text-secondary" for="termsCheck">
+                            Tôi xin cam đoan toàn bộ thông tin kê khai trên là hoàn toàn đúng sự thật và cam kết chấp hành nghiêm túc Điều lệ, Quy chế hoạt động của Hiệp hội.
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <a asp-controller="Auth" asp-action="DangNhap" class="text-decoration-none text-muted small">
+                            <i class="bi bi-arrow-left me-1"></i>Quay lại trang Đăng nhập
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+                            <i class="bi bi-send-check me-1"></i> Gửi đơn đăng ký gia nhập
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

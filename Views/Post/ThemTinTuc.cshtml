@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Đăng bài viết mới";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9 col-md-11">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>Soạn Thảo Bài Viết Mới
+                        </h4>
+                        <small class="text-muted">Đăng tải tin tức, thông báo hoặc công trình nghiên cứu lên cổng thông tin</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-controller="Post" asp-action="ThemTinTuc" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tiêu đề bài viết <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" placeholder="Nhập tiêu đề bài viết rõ ràng, súc tích..." required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Chuyên mục tin tức <span class="text-danger">*</span></label>
+                            <select name="categoryId" class="form-select" required>
+                                <option value="1">Nghiên cứu & Công nghệ</option>
+                                <option value="2">Thông báo Hiệp hội</option>
+                                <option value="3">Sinh hoạt Hội viên</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Ảnh đại diện bài viết</label>
+                            <input type="file" name="thumbnail" class="form-control" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tóm tắt ngắn gọn</label>
+                        <textarea name="summary" rows="2" class="form-control" placeholder="Tóm tắt 1-2 câu ngắn mô tả nội dung chính..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary small">Nội dung chi tiết bài viết <span class="text-danger">*</span></label>
+                        <textarea name="content" rows="8" class="form-control" placeholder="Soạn thảo toàn văn nội dung bài viết..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <a asp-controller="Post" asp-action="DanhSachTinTuc" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-cloud-arrow-up me-1"></i> Xuất bản bài viết
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

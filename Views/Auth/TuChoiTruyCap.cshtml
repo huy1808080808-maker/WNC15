@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Từ chối quyền truy cập";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5 text-center">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <div class="mb-4">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-4">
+                    <i class="bi bi-shield-x fs-1"></i>
+                </div>
+            </div>
+            
+            <h4 class="fw-bold text-dark mb-2">Không Có Quyền Truy Cập</h4>
+            <p class="text-muted small mb-4">
+                Tài khoản của bạn không có đặc quyền để truy cập vào phân hệ này (yêu cầu quyền Quản trị viên), hoặc hồ sơ hội viên của bạn chưa được kích hoạt chính thức.
+            </p>
+
+            <div class="d-flex flex-column gap-2">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary py-2 fw-semibold">
+                    <i class="bi bi-house me-1"></i> Trở về Trang chủ
+                </a>
+                <a asp-controller="Profile" asp-action="ThongTinCaNhan" class="btn btn-outline-secondary py-2">
+                    <i class="bi bi-person-badge me-1"></i> Kiểm tra tình trạng hồ sơ cá nhân
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Tạo sự kiện mới";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9 col-md-11">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-calendar-plus text-primary me-2"></i>Tạo Sự Kiện Mới
+                        </h4>
+                        <small class="text-muted">Lập lịch hội thảo, tọa đàm hoặc khóa tập huấn cho hội viên</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-controller="Event" asp-action="ThemSuKien" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên sự kiện / Hội thảo <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo..." required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Địa điểm tổ chức <span class="text-danger">*</span></label>
+                            <input type="text" name="location" class="form-control" placeholder="Hội trường hoặc Link Zoom..." required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Số lượng chỗ tối đa <span class="text-danger">*</span></label>
+                            <input type="number" name="maxParticipants" class="form-control" value="100" min="1" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-secondary small">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="startDate" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-secondary small">Thời gian kết thúc</label>
+                            <input type="datetime-local" name="endDate" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-secondary small">Hạn cuối đăng ký</label>
+                            <input type="datetime-local" name="deadlineDate" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary small">Mô tả & Chương trình chi tiết</label>
+                        <textarea name="description" rows="5" class="form-control" placeholder="Nội dung, diễn giả, quyền lợi người tham gia..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <a asp-controller="Event" asp-action="DanhSachSuKien" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-calendar-check me-1"></i> Lưu và Phát hành sự kiện
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

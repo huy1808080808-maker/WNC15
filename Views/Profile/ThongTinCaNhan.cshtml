@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-person-vcard text-primary me-2"></i>Hồ Sơ Hội Viên
+                </h3>
+                <p class="text-muted small mb-0">Quản lý và cập nhật thông tin cá nhân trong hệ thống Hiệp hội</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Profile" asp-action="ChinhSua" class="btn btn-outline-primary btn-sm px-3">
+                    <i class="bi bi-pencil me-1"></i> Cập nhật thông tin
+                </a>
+                <a asp-controller="Profile" asp-action="DoiMatKhau" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="bi bi-key me-1"></i> Đổi mật khẩu
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cột trái: Thẻ đại diện & Trạng thái hồ sơ -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+                    <div class="mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-4 shadow-sm">
+                            <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">NGUYỄN VĂN AN</h5>
+                    <p class="text-muted small mb-3">Tiến sĩ / Giảng viên cao cấp</p>
+
+                    <!-- Huy hiệu trạng thái duyệt tài khoản -->
+                    <div class="mb-3">
+                        <span class="badge bg-success px-3 py-2 rounded-pill">
+                            <i class="bi bi-check-circle-fill me-1"></i> Hội viên chính thức
+                        </span>
+                    </div>
+
+                    <div class="border-top pt-3 text-start small text-secondary">
+                        <div class="mb-2"><i class="bi bi-envelope text-primary me-2"></i>nguyenvanan@gmail.com</div>
+                        <div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i>0912 345 678</div>
+                        <div><i class="bi bi-calendar3 text-primary me-2"></i>Gia nhập: 15/01/2026</div>
+                    </div>
+                </div>
+
+                <!-- Thống kê nhanh của hội viên -->
+                <div class="card border-0 shadow-sm rounded-4 p-3 mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-secondary"><i class="bi bi-calendar-check text-primary me-2"></i>Sự kiện tham gia</span>
+                        <a asp-controller="Profile" asp-action="SuKienCuaToi" class="badge bg-primary text-decoration-none">3 sự kiện</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Thông tin chi tiết chuyên môn & công tác -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        <i class="bi bi-info-circle me-1"></i> Thông Tin Chi Tiết
+                    </h5>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <label class="text-muted small d-block">Cơ quan / Đơn vị công tác</label>
+                            <span class="fw-semibold text-dark">Trường Đại học Bách Khoa</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-muted small d-block">Chức danh / Chức vụ</label>
+                            <span class="fw-semibold text-dark">Giảng viên / Trưởng nhóm nghiên cứu</span>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small d-block">Lĩnh vực hoạt động chuyên môn</label>
+                            <span class="fw-semibold text-dark">Trí tuệ nhân tạo, Xử lý ảnh số & Khoa học máy tính</span>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        <i class="bi bi-file-text me-1"></i> Giới Thiệu Bản Thân
+                    </h5>
+                    <p class="text-secondary small lh-lg mb-0">
+                        Có hơn 10 năm kinh nghiệm giảng dạy và chủ trì các đề tài khoa học cấp nhà nước trong lĩnh vực Thị giác máy tính và Học sâu. Tham gia Hiệp hội với mục tiêu kết nối giao lưu học thuật, hỗ trợ các nhà nghiên cứu trẻ và thúc đẩy các dự án chuyển giao ứng dụng công nghệ thực tiễn.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
