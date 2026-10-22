@@ -1,4 +1,4 @@
--- =============================================
+﻿-- =============================================
 -- KỊCH BẢN TẠO CƠ SỞ DỮ LIỆU VÀ DỮ LIỆU MẪU
 -- ĐỒ ÁN: QUẢN LÝ HIỆP HỘI / HỘI VIÊN (WNC15)
 -- =============================================
@@ -103,12 +103,12 @@ GO
 -- Chuỗi hash BCrypt chuẩn bên dưới tương ứng với '123456'
 -- =============================================
 
--- 1. Thêm dữ liệu mẫu vào bảng nguoi_dung
+-- 1. Thêm dữ liệu mẫu vào bảng nguoi_dung (Mật khẩu: 123456)
 INSERT INTO nguoi_dung (ho_ten, email, so_dien_thoai, don_vi_cong_tac, chuc_danh, linh_vuc, mat_khau_ma_hoa, ngay_sinh, gioi_thieu, vai_tro, trang_thai) 
 VALUES
- (N'Quản trị viên', 'admin@hiephoi.vn', '0900000001', N'Ban chấp hành', N'Quản trị hệ thống', NULL, '$2a$11$wE53O373tqP8z3vW.YmNMeiH7kKzE7Jm75dZJ/0lVfH3s9c2h6n5y', '1985-05-20', N'Tài khoản quản trị hệ thống.', 'quan_tri', 'hoat_dong'),
- (N'Trần Thị Mai', 'mai.tran@example.com', '0900000002', N'Công ty ABC', N'Trưởng phòng', N'Công nghệ thông tin', '$2a$11$wE53O373tqP8z3vW.YmNMeiH7kKzE7Jm75dZJ/0lVfH3s9c2h6n5y', '1990-03-12', N'Mong muốn kết nối với cộng đồng nghề nghiệp.', 'hoi_vien', 'hoat_dong'),
- (N'Phạm Văn Nam', 'nam.pham@example.com', '0900000003', N'XYZ', N'Chuyên viên', N'Marketing', '$2a$11$wE53O373tqP8z3vW.YmNMeiH7kKzE7Jm75dZJ/0lVfH3s9c2h6n5y', '1995-11-02', N'Muốn tham gia để học hỏi kinh nghiệm.', 'hoi_vien', 'cho_duyet');
+ (N'Quản trị viên Hiệp hội', 'admin@hiephoi.vn', '0900000001', N'Ban Chấp Hành Hiệp Hội', N'Quản trị hệ thống', N'Công nghệ thông tin', '123456', '1985-05-20', N'Tài khoản quản trị hệ thống Hiệp hội Khoa học & Công nghệ.', 'quan_tri', 'hoat_dong'),
+ (N'Trần Thị Mai', 'mai.tran@example.com', '0900000002', N'Trường Đại học Bách Khoa', N'Tiến sĩ / Giảng viên', N'Công nghệ thông tin & Trí tuệ nhân tạo', '123456', '1990-03-12', N'Mong muốn kết nối và chia sẻ tri thức với cộng đồng nghề nghiệp.', 'hoi_vien', 'hoat_dong'),
+ (N'Phạm Văn Nam', 'nam.pham@example.com', '0900000003', N'Viện Nghiên cứu Điện tử & Tin học', N'Nghiên cứu viên chính', N'Hệ thống nhúng & IoT', '123456', '1995-11-02', N'Mong muốn tham gia để học hỏi kinh nghiệm và đóng góp cho Hiệp hội.', 'hoi_vien', 'cho_duyet');
 GO
 
 -- 2. Thêm dữ liệu mẫu vào bảng danh_muc (Danh mục bài viết)

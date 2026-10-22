@@ -1,5 +1,15 @@
-﻿@{
+﻿@model WNC15.Models.NguoiDung
+@{
     ViewData["Title"] = "Hồ sơ cá nhân";
+    var hoTen = Model != null ? Model.HoTen : "Hội viên";
+    var chucDanh = Model != null && !string.IsNullOrEmpty(Model.ChucDanh) ? Model.ChucDanh : "Chuyên gia / Nhà nghiên cứu";
+    var email = Model != null ? Model.Email : "Chưa cập nhật";
+    var sdt = Model != null && !string.IsNullOrEmpty(Model.SoDienThoai) ? Model.SoDienThoai : "Chưa cập nhật";
+    var ngayGiaNhap = Model != null ? Model.NgayTao.ToString("dd/MM/yyyy") : "2026";
+    var donVi = Model != null && !string.IsNullOrEmpty(Model.DonViCongTac) ? Model.DonViCongTac : "Chưa cập nhật";
+    var linhVuc = Model != null && !string.IsNullOrEmpty(Model.LinhVuc) ? Model.LinhVuc : "Khoa học & Công nghệ";
+    var gioiThieu = Model != null && !string.IsNullOrEmpty(Model.GioiThieu) ? Model.GioiThieu : "Chưa có thông tin giới thiệu bản thân.";
+    var soSuKien = ViewBag.SoSuKien != null ? (int)ViewBag.SoSuKien : 0;
 }
 
 <div class="row justify-content-center py-3">
@@ -30,20 +40,29 @@
                             <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
                         </div>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">NGUYỄN VĂN AN</h5>
-                    <p class="text-muted small mb-3">Tiến sĩ / Giảng viên cao cấp</p>
+                    <h5 class="fw-bold text-dark mb-1">@hoTen</h5>
+                    <p class="text-muted small mb-3">@chucDanh</p>
 
                     <!-- Huy hiệu trạng thái duyệt tài khoản -->
                     <div class="mb-3">
-                        <span class="badge bg-success px-3 py-2 rounded-pill">
-                            <i class="bi bi-check-circle-fill me-1"></i> Hội viên chính thức
-                        </span>
+                        @if (Model != null && Model.TrangThai == "hoat_dong")
+                        {
+                            <span class="badge bg-success px-3 py-2 rounded-pill">
+                                <i class="bi bi-check-circle-fill me-1"></i> Hội viên chính thức
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                <i class="bi bi-hourglass-split me-1"></i> Hồ sơ chờ duyệt
+                            </span>
+                        }
                     </div>
 
                     <div class="border-top pt-3 text-start small text-secondary">
-                        <div class="mb-2"><i class="bi bi-envelope text-primary me-2"></i>nguyenvanan@gmail.com</div>
-                        <div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i>0912 345 678</div>
-                        <div><i class="bi bi-calendar3 text-primary me-2"></i>Gia nhập: 15/01/2026</div>
+                        <div class="mb-2"><i class="bi bi-envelope text-primary me-2"></i>@email</div>
+                        <div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i>@sdt</div>
+                        <div><i class="bi bi-calendar3 text-primary me-2"></i>Gia nhập: @ngayGiaNhap</div>
                     </div>
                 </div>
 
@@ -51,7 +70,7 @@
                 <div class="card border-0 shadow-sm rounded-4 p-3 mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="small text-secondary"><i class="bi bi-calendar-check text-primary me-2"></i>Sự kiện tham gia</span>
-                        <a asp-controller="Profile" asp-action="SuKienCuaToi" class="badge bg-primary text-decoration-none">3 sự kiện</a>
+                        <a asp-controller="Profile" asp-action="SuKienCuaToi" class="badge bg-primary text-decoration-none">@soSuKien sự kiện</a>
                     </div>
                 </div>
             </div>
@@ -66,23 +85,23 @@
                     <div class="row g-3 mb-4">
                         <div class="col-sm-6">
                             <label class="text-muted small d-block">Cơ quan / Đơn vị công tác</label>
-                            <span class="fw-semibold text-dark">Trường Đại học Bách Khoa</span>
+                            <span class="fw-semibold text-dark">@donVi</span>
                         </div>
                         <div class="col-sm-6">
                             <label class="text-muted small d-block">Chức danh / Chức vụ</label>
-                            <span class="fw-semibold text-dark">Giảng viên / Trưởng nhóm nghiên cứu</span>
+                            <span class="fw-semibold text-dark">@chucDanh</span>
                         </div>
                         <div class="col-12">
                             <label class="text-muted small d-block">Lĩnh vực hoạt động chuyên môn</label>
-                            <span class="fw-semibold text-dark">Trí tuệ nhân tạo, Xử lý ảnh số & Khoa học máy tính</span>
+                            <span class="fw-semibold text-dark">@linhVuc</span>
                         </div>
                     </div>
 
                     <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
                         <i class="bi bi-file-text me-1"></i> Giới Thiệu Bản Thân
                     </h5>
-                    <p class="text-secondary small lh-lg mb-0">
-                        Có hơn 10 năm kinh nghiệm giảng dạy và chủ trì các đề tài khoa học cấp nhà nước trong lĩnh vực Thị giác máy tính và Học sâu. Tham gia Hiệp hội với mục tiêu kết nối giao lưu học thuật, hỗ trợ các nhà nghiên cứu trẻ và thúc đẩy các dự án chuyển giao ứng dụng công nghệ thực tiễn.
+                    <p class="text-secondary small lh-lg mb-0" style="white-space: pre-line;">
+                        @gioiThieu
                     </p>
                 </div>
             </div>

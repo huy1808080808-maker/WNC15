@@ -1,5 +1,8 @@
-﻿@{
+﻿@model IEnumerable<WNC15.Models.BaiViet>
+@{
     ViewData["Title"] = "Tin tức & Hoạt động chuyên môn";
+    var tuKhoa = ViewBag.Search as string ?? "";
+    var maDanhMuc = ViewBag.CategoryId != null ? (int)ViewBag.CategoryId : 0;
 }
 
 <div class="py-3">
@@ -25,15 +28,15 @@
                 <div class="col-md-7">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control bg-light border-start-0" placeholder="Nhập từ khóa tìm kiếm bài viết..." />
+                        <input type="text" name="search" value="@tuKhoa" class="form-control bg-light border-start-0" placeholder="Nhập từ khóa tìm kiếm bài viết..." />
                     </div>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select bg-light" name="categoryId">
-                        <option value="">Tất cả chuyên mục</option>
-                        <option value="1">Nghiên cứu & Công nghệ</option>
-                        <option value="2">Thông báo Hiệp hội</option>
-                        <option value="3">Sinh hoạt Hội viên</option>
+                        <option value="0">Tất cả chuyên mục</option>
+                        <option value="1" selected="@(maDanhMuc == 1)">Nghiên cứu & Công nghệ</option>
+                        <option value="2" selected="@(maDanhMuc == 2)">Thông báo Hiệp hội</option>
+                        <option value="3" selected="@(maDanhMuc == 3)">Sinh hoạt Hội viên</option>
                     </select>
                 </div>
                 <div class="col-md-2 d-grid">
@@ -47,91 +50,52 @@
 
     <!-- Danh sách bài viết dạng lưới Card -->
     <div class="row g-4 mb-4">
-        <!-- Bài viết mẫu 1 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-primary bg-opacity-10 text-primary text-center py-5">
-                    <i class="bi bi-cpu fs-1"></i>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-primary-subtle text-primary">Nghiên cứu & Công nghệ</span>
-                        <small class="text-muted"><i class="bi bi-clock me-1"></i>Hôm nay</small>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="bg-primary bg-opacity-10 text-primary text-center py-5">
+                            <i class="bi bi-journal-text fs-1"></i>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary-subtle text-primary">
+                                    @(item.DanhMuc != null ? item.DanhMuc.TenDanhMuc : "Tin tức")
+                                </span>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>@item.NgayTao.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            <h5 class="fw-bold mb-2">
+                                <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="@item.MaBaiViet" class="text-dark text-decoration-none">
+                                    @item.TieuDe
+                                </a>
+                            </h5>
+                            <p class="text-secondary small flex-grow-1">
+                                @(string.IsNullOrEmpty(item.TomTat) ? (item.NoiDung.Length > 100 ? item.NoiDung.Substring(0, 100) + "..." : item.NoiDung) : item.TomTat)
+                            </p>
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>@(item.TacGia != null ? item.TacGia.HoTen : "Ban Biên Tập")
+                                </small>
+                                <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="@item.MaBaiViet" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Đọc tiếp <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <h5 class="fw-bold mb-2">
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="1" class="text-dark text-decoration-none">
-                            Xu hướng ứng dụng Trí tuệ nhân tạo trong chuyển đổi số doanh nghiệp
-                        </a>
-                    </h5>
-                    <p class="text-secondary small flex-grow-1">
-                        Tổng hợp các báo cáo khoa học mới nhất về giải pháp tối ưu hóa năng suất làm việc và tự động hóa quy trình...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <small class="text-muted"><i class="bi bi-person me-1"></i>Ban Thư Ký</small>
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="1" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            Đọc tiếp <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <div class="bg-light text-muted rounded-circle d-inline-flex p-4 mb-3">
+                    <i class="bi bi-journal-x fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Không tìm thấy bài viết nào</h5>
+                <p class="text-muted small">Vui lòng thử tìm kiếm với từ khóa khác hoặc bấm Đăng bài viết mới.</p>
             </div>
-        </div>
-
-        <!-- Bài viết mẫu 2 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-success bg-opacity-10 text-success text-center py-5">
-                    <i class="bi bi-megaphone fs-1"></i>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-success-subtle text-success">Thông báo Hiệp hội</span>
-                        <small class="text-muted"><i class="bi bi-clock me-1"></i>2 ngày trước</small>
-                    </div>
-                    <h5 class="fw-bold mb-2">
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="2" class="text-dark text-decoration-none">
-                            Kế hoạch tổ chức Đại hội Hội viên thường niên nhiệm kỳ 2026 - 2030
-                        </a>
-                    </h5>
-                    <p class="text-secondary small flex-grow-1">
-                        Ban Chấp hành Hiệp hội thông báo triệu tập Đại hội nhằm tổng kết nhiệm kỳ qua và bầu ra Ban điều hành mới...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <small class="text-muted"><i class="bi bi-person me-1"></i>Ban Chấp Hành</small>
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="2" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            Đọc tiếp <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bài viết mẫu 3 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-warning bg-opacity-10 text-warning text-center py-5">
-                    <i class="bi bi-journal-code fs-1"></i>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-warning-subtle text-dark">Sinh hoạt Hội viên</span>
-                        <small class="text-muted"><i class="bi bi-clock me-1"></i>4 ngày trước</small>
-                    </div>
-                    <h5 class="fw-bold mb-2">
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="3" class="text-dark text-decoration-none">
-                            Kêu gọi gửi công trình nghiên cứu và đề tài tham gia giải thưởng thường niên
-                        </a>
-                    </h5>
-                    <p class="text-secondary small flex-grow-1">
-                        Chương trình vinh danh các nhà khoa học, hội viên có nhiều đóng góp xuất sắc trong việc phát triển khoa học công nghệ...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <small class="text-muted"><i class="bi bi-person me-1"></i>Hội Đồng Khoa Học</small>
-                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="3" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            Đọc tiếp <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </div>

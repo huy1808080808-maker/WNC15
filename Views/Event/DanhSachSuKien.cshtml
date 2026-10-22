@@ -1,5 +1,7 @@
-﻿@{
+﻿@model IEnumerable<WNC15.Models.SuKien>
+@{
     ViewData["Title"] = "Lịch sự kiện & Hội thảo chuyên môn";
+    var timKiem = ViewBag.Search as string;
 }
 
 <div class="py-3">
@@ -25,7 +27,7 @@
                 <div class="col-md-9">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control bg-light border-start-0" placeholder="Tìm kiếm theo tên sự kiện hoặc địa điểm tổ chức..." />
+                        <input type="text" name="search" value="@timKiem" class="form-control bg-light border-start-0" placeholder="Tìm kiếm theo tên sự kiện hoặc địa điểm tổ chức..." />
                     </div>
                 </div>
                 <div class="col-md-3 d-grid">
@@ -37,93 +39,95 @@
         </form>
     </div>
 
-    <!-- Danh sách Sự kiện dạng lưới Card -->
-    <div class="row g-4 mb-4">
-        <!-- Sự kiện mẫu 1 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-primary text-white p-4 text-center position-relative">
-                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-3 py-1">Đang mở đăng ký</span>
-                    <i class="bi bi-laptop fs-1 mb-2"></i>
-                    <h5 class="fw-bold mb-0">Hội thảo Quốc tế về AI & Dữ liệu</h5>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="mb-3 text-secondary small">
-                        <div class="mb-1"><i class="bi bi-calendar-check text-primary me-2"></i>Thời gian: <strong>15/11/2026</strong></div>
-                        <div class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa điểm: <strong>Hội trường A, Tòa nhà Hiệp hội</strong></div>
-                        <div><i class="bi bi-people-fill text-success me-2"></i>Số chỗ còn lại: <strong>45 / 100</strong></div>
-                    </div>
-                    <p class="text-muted small flex-grow-1">
-                        Sự kiện quy tụ các chuyên gia hàng đầu trong và ngoài nước chia sẻ về các mô hình tính toán hiệu năng cao...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <a asp-controller="Event" asp-action="ChiTiet" asp-route-id="1" class="btn btn-primary btn-sm px-3 rounded-pill">
-                            <i class="bi bi-eye me-1"></i> Xem & Giữ chỗ
-                        </a>
-                        <a asp-controller="Event" asp-action="DanhSachDiemDanh" asp-route-id="1" class="btn btn-outline-secondary btn-sm rounded-pill" title="Dành cho Quản trị viên">
-                            <i class="bi bi-card-checklist me-1"></i> Danh sách
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Danh sách Sự kiện động từ CSDL -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4 mb-4">
+            @foreach (var sk in Model)
+            {
+                int soNguoiDangKy = 0;
+                if (sk.DangKySuKiens != null)
+                {
+                    soNguoiDangKy = sk.DangKySuKiens.Count;
+                }
+                int soChoConLai = sk.SoLuongToiDa - soNguoiDangKy;
+                if (soChoConLai < 0)
+                {
+                    soChoConLai = 0;
+                }
+                bool daHetHan = DateTime.Now > sk.HanDangKy;
+                bool dayCho = soChoConLai <= 0;
 
-        <!-- Sự kiện mẫu 2 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-success text-white p-4 text-center position-relative">
-                    <span class="badge bg-light text-dark position-absolute top-0 end-0 m-3 px-3 py-1">Sắp diễn ra</span>
-                    <i class="bi bi-chat-heart fs-1 mb-2"></i>
-                    <h5 class="fw-bold mb-0">Tọa đàm Kết nối Hội viên Quý 4</h5>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="mb-3 text-secondary small">
-                        <div class="mb-1"><i class="bi bi-calendar-check text-primary me-2"></i>Thời gian: <strong>28/11/2026</strong></div>
-                        <div class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa điểm: <strong>Phòng Hội thảo trực tuyến Zoom</strong></div>
-                        <div><i class="bi bi-people-fill text-success me-2"></i>Số chỗ còn lại: <strong>120 / 200</strong></div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="bg-primary text-white p-4 text-center position-relative">
+                            @if (daHetHan)
+                            {
+                                <span class="badge bg-secondary position-absolute top-0 end-0 m-3 px-3 py-1">Đã hết hạn</span>
+                            }
+                            else if (dayCho)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-1">Đã đầy chỗ</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-3 py-1">Đang mở đăng ký</span>
+                            }
+                            <i class="bi bi-calendar2-week fs-1 mb-2"></i>
+                            <h5 class="fw-bold mb-0 text-truncate" title="@sk.TenSuKien">@sk.TenSuKien</h5>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="mb-3 text-secondary small">
+                                <div class="mb-1">
+                                    <i class="bi bi-calendar-check text-primary me-2"></i>Thời gian: <strong>@sk.ThoiGianToChuc.ToString("dd/MM/yyyy HH:mm")</strong>
+                                </div>
+                                <div class="mb-1 text-truncate" title="@sk.DiaDiem">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa điểm: <strong>@sk.DiaDiem</strong>
+                                </div>
+                                <div>
+                                    <i class="bi bi-people-fill text-success me-2"></i>Số chỗ còn lại: <strong>@soChoConLai / @sk.SoLuongToiDa</strong>
+                                </div>
+                            </div>
+                            <p class="text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                @sk.MoTa
+                            </p>
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                <a asp-controller="Event" asp-action="ChiTiet" asp-route-id="@sk.MaSuKien" class="btn btn-primary btn-sm px-3 rounded-pill">
+                                    <i class="bi bi-eye me-1"></i> Xem & Giữ chỗ
+                                </a>
+                                <div class="d-flex gap-1">
+                                    <a asp-controller="Event" asp-action="DanhSachDiemDanh" asp-route-id="@sk.MaSuKien" class="btn btn-outline-secondary btn-sm rounded-pill" title="Xem danh sách người đăng ký">
+                                        <i class="bi bi-card-checklist me-1"></i> DS (@soNguoiDangKy)
+                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("quan_tri"))
+                                    {
+                                        <form asp-controller="Event" asp-action="XoaSuKien" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sự kiện này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@sk.MaSuKien" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill" title="Xóa sự kiện">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-muted small flex-grow-1">
-                        Gặp gỡ, giao lưu giữa các hội viên kỳ cựu và các hội viên mới gia nhập, định hướng hoạt động nhiệm kỳ mới...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <a asp-controller="Event" asp-action="ChiTiet" asp-route-id="2" class="btn btn-primary btn-sm px-3 rounded-pill">
-                            <i class="bi bi-eye me-1"></i> Xem & Giữ chỗ
-                        </a>
-                        <a asp-controller="Event" asp-action="DanhSachDiemDanh" asp-route-id="2" class="btn btn-outline-secondary btn-sm rounded-pill" title="Dành cho Quản trị viên">
-                            <i class="bi bi-card-checklist me-1"></i> Danh sách
-                        </a>
-                    </div>
                 </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <i class="bi bi-calendar-x text-muted" style="font-size: 3.5rem;"></i>
+            <h5 class="fw-bold mt-3 text-secondary">Chưa có sự kiện nào</h5>
+            <p class="text-muted small">Hiện tại chưa có sự kiện nào được tạo hoặc phù hợp với từ khóa tìm kiếm.</p>
+            <div class="mt-2">
+                <a asp-controller="Event" asp-action="ThemSuKien" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                    <i class="bi bi-calendar-plus me-1"></i> Tạo sự kiện mới ngay
+                </a>
             </div>
         </div>
-
-        <!-- Sự kiện mẫu 3 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-secondary text-white p-4 text-center position-relative">
-                    <span class="badge bg-dark position-absolute top-0 end-0 m-3 px-3 py-1">Đã kết thúc</span>
-                    <i class="bi bi-mortarboard fs-1 mb-2"></i>
-                    <h5 class="fw-bold mb-0">Khóa bồi dưỡng Công bố Quốc tế</h5>
-                </div>
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="mb-3 text-secondary small">
-                        <div class="mb-1"><i class="bi bi-calendar-check text-primary me-2"></i>Thời gian: <strong>10/10/2026</strong></div>
-                        <div class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Địa điểm: <strong>Trung tâm Đào tạo Hiệp hội</strong></div>
-                        <div><i class="bi bi-people-fill text-success me-2"></i>Số lượng tham dự: <strong>50 / 50 (Đầy chỗ)</strong></div>
-                    </div>
-                    <p class="text-muted small flex-grow-1">
-                        Kỹ năng viết bài báo khoa học chuẩn ISI/Scopus và kinh nghiệm phản biện quốc tế dành cho hội viên...
-                    </p>
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                        <a asp-controller="Event" asp-action="ChiTiet" asp-route-id="3" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
-                            <i class="bi bi-info-circle me-1"></i> Xem thông tin
-                        </a>
-                        <a asp-controller="Event" asp-action="DanhSachDiemDanh" asp-route-id="3" class="btn btn-outline-secondary btn-sm rounded-pill" title="Dành cho Quản trị viên">
-                            <i class="bi bi-card-checklist me-1"></i> Danh sách
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 </div>

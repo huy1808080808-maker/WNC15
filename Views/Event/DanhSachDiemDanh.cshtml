@@ -1,9 +1,23 @@
 ﻿@model IEnumerable<WNC15.Models.DangKySuKien>
 @{
     ViewData["Title"] = "Danh sách hội viên đăng ký tham gia";
-    var tenSuKien = ViewBag.TenSuKien as string ?? "Hội thảo Khoa học";
-    var maSuKien = ViewBag.MaSuKien ?? 1;
-    var tongSo = Model?.Count() ?? 0;
+    string tenSuKien = "Hội thảo Khoa học";
+    if (ViewBag.TenSuKien != null)
+    {
+        tenSuKien = ViewBag.TenSuKien.ToString();
+    }
+
+    int maSuKien = 1;
+    if (ViewBag.MaSuKien != null)
+    {
+        maSuKien = (int)ViewBag.MaSuKien;
+    }
+
+    int tongSo = 0;
+    if (Model != null)
+    {
+        tongSo = Model.Count();
+    }
 }
 
 <div class="py-3">
@@ -57,15 +71,28 @@
                         }
                         @foreach (var item in Model)
                         {
+                            string hoTenNd = "Hội viên";
+                            string chucDanhNd = "Chuyên gia";
+                            string emailNd = "Chưa cập nhật";
+                            string sdtNd = "Chưa cập nhật";
+                            string donViNd = "Chưa cập nhật";
+                            if (item.NguoiDung != null)
+                            {
+                                if (!string.IsNullOrEmpty(item.NguoiDung.HoTen)) { hoTenNd = item.NguoiDung.HoTen; }
+                                if (!string.IsNullOrEmpty(item.NguoiDung.ChucDanh)) { chucDanhNd = item.NguoiDung.ChucDanh; }
+                                if (!string.IsNullOrEmpty(item.NguoiDung.Email)) { emailNd = item.NguoiDung.Email; }
+                                if (!string.IsNullOrEmpty(item.NguoiDung.SoDienThoai)) { sdtNd = item.NguoiDung.SoDienThoai; }
+                                if (!string.IsNullOrEmpty(item.NguoiDung.DonViCongTac)) { donViNd = item.NguoiDung.DonViCongTac; }
+                            }
                             <tr>
                                 <td class="ps-4 fw-bold">@(stt++)</td>
                                 <td>
-                                    <strong class="text-dark">@(item.NguoiDung?.HoTen ?? "Hội viên")</strong>
-                                    <div class="text-muted" style="font-size: 0.8rem;">@(item.NguoiDung?.ChucDanh ?? "Chuyên gia")</div>
+                                    <strong class="text-dark">@hoTenNd</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">@chucDanhNd</div>
                                 </td>
-                                <td>@(item.NguoiDung?.Email ?? "Chưa cập nhật")</td>
-                                <td>@(item.NguoiDung?.SoDienThoai ?? "Chưa cập nhật")</td>
-                                <td>@(item.NguoiDung?.DonViCongTac ?? "Chưa cập nhật")</td>
+                                <td>@emailNd</td>
+                                <td>@sdtNd</td>
+                                <td>@donViNd</td>
                                 <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="text-center pe-4">
                                     <span class="badge bg-success-subtle text-success px-3 py-2">

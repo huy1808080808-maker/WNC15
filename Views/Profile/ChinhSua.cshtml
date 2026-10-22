@@ -1,5 +1,11 @@
-﻿@{
+﻿@model WNC15.Models.NguoiDung
+@{
     ViewData["Title"] = "Cập nhật hồ sơ cá nhân";
+    var hoTen = Model != null ? Model.HoTen : "";
+    var sdt = Model != null ? Model.SoDienThoai : "";
+    var donVi = Model != null ? Model.DonViCongTac : "";
+    var chucDanh = Model != null ? Model.ChucDanh : "";
+    var gioiThieu = Model != null ? Model.GioiThieu : "";
 }
 
 <div class="row justify-content-center py-3">
@@ -17,40 +23,36 @@
             </div>
 
             <div class="card-body p-4">
-                <form asp-controller="Profile" asp-action="ChinhSua" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2 mb-3"></div>
+
+                <form asp-controller="Profile" asp-action="ChinhSua" method="post">
                     @Html.AntiForgeryToken()
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">Họ và tên <span class="text-danger">*</span></label>
-                            <input type="text" name="fullName" class="form-control" value="NGUYỄN VĂN AN" required />
+                            <input type="text" name="fullName" class="form-control" value="@hoTen" required />
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">Số điện thoại <span class="text-danger">*</span></label>
-                            <input type="tel" name="phoneNumber" class="form-control" value="0912345678" required />
+                            <label class="form-label small fw-semibold text-secondary">Số điện thoại</label>
+                            <input type="tel" name="phoneNumber" class="form-control" value="@sdt" />
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">Cơ quan / Đơn vị công tác</label>
-                            <input type="text" name="address" class="form-control" value="Trường Đại học Bách Khoa" />
+                            <input type="text" name="address" class="form-control" value="@donVi" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">Chức danh / Chức vụ</label>
-                            <input type="text" name="jobTitle" class="form-control" value="Giảng viên / Trưởng nhóm nghiên cứu" />
+                            <input type="text" name="jobTitle" class="form-control" value="@chucDanh" />
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">Ảnh đại diện mới</label>
-                        <input type="file" name="avatar" class="form-control" accept="image/*" />
-                        <small class="text-muted">Chấp nhận định dạng JPG, PNG dung lượng dưới 5MB</small>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-secondary">Tóm tắt quá trình công tác & Giới thiệu bản thân</label>
-                        <textarea name="introduction" rows="4" class="form-control">Có hơn 10 năm kinh nghiệm giảng dạy và chủ trì các đề tài khoa học cấp nhà nước trong lĩnh vực Thị giác máy tính và Học sâu.</textarea>
+                        <textarea name="introduction" rows="4" class="form-control">@gioiThieu</textarea>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top">
@@ -58,7 +60,7 @@
                             <i class="bi bi-x-circle me-1"></i> Quay lại
                         </a>
                         <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
-                            <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
+                            <i class="bi bi-check2-circle me-1"></i> Lưu thông tin thay đổi
                         </button>
                     </div>
                 </form>

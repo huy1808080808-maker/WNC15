@@ -16,6 +16,13 @@
                 </div>
 
                 <!-- Hiển thị lỗi xác thực nếu có -->
+                @if (ViewBag.Loi != null)
+                {
+                    <div class="alert alert-danger small py-2 mb-3 d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                        <div>@ViewBag.Loi</div>
+                    </div>
+                }
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2 mb-3" role="alert"></div>
 
                 <form asp-controller="Auth" asp-action="DangNhap" method="post" asp-route-returnUrl="@returnUrl">

@@ -1,14 +1,47 @@
 ﻿@model WNC15.Models.SuKien
 @{
     ViewData["Title"] = "Chi tiết sự kiện & Đăng ký tham gia";
-    var maSuKien = Model?.MaSuKien ?? 1;
-    var tenSuKien = Model?.TenSuKien ?? "Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo & Dữ liệu";
-    var diaDiem = Model?.DiaDiem ?? "Hội trường A, Tòa nhà Hiệp hội";
-    var thoiGian = Model != null && Model.ThoiGianToChuc != default ? Model.ThoiGianToChuc.ToString("dd/MM/yyyy HH:mm") : "15/11/2026 08:30";
-    var soLuongToiDa = Model?.SoLuongToiDa ?? 100;
-    var soLuongDaDangKy = Model?.DangKySuKiens?.Count ?? 0;
-    var soChoConLai = soLuongToiDa - soLuongDaDangKy;
-    if (soChoConLai < 0) soChoConLai = 0;
+    int maSuKien = 1;
+    string tenSuKien = "Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo & Dữ liệu";
+    string diaDiem = "Hội trường A, Tòa nhà Hiệp hội";
+    string thoiGian = "15/11/2026 08:30";
+    int soLuongToiDa = 100;
+    int soLuongDaDangKy = 0;
+    string moTa = "Hội thảo quy tụ các chuyên gia hàng đầu trao đổi về ứng dụng AI trong thực tiễn.";
+
+    if (Model != null)
+    {
+        maSuKien = Model.MaSuKien;
+        if (!string.IsNullOrEmpty(Model.TenSuKien))
+        {
+            tenSuKien = Model.TenSuKien;
+        }
+        if (!string.IsNullOrEmpty(Model.DiaDiem))
+        {
+            diaDiem = Model.DiaDiem;
+        }
+        if (Model.ThoiGianToChuc != default)
+        {
+            thoiGian = Model.ThoiGianToChuc.ToString("dd/MM/yyyy HH:mm");
+        }
+        if (Model.SoLuongToiDa > 0)
+        {
+            soLuongToiDa = Model.SoLuongToiDa;
+        }
+        if (Model.DangKySuKiens != null)
+        {
+            soLuongDaDangKy = Model.DangKySuKiens.Count;
+        }
+        if (!string.IsNullOrEmpty(Model.MoTa))
+        {
+            moTa = Model.MoTa;
+        }
+    }
+    int soChoConLai = soLuongToiDa - soLuongDaDangKy;
+    if (soChoConLai < 0)
+    {
+        soChoConLai = 0;
+    }
 }
 
 <div class="row justify-content-center py-3">
@@ -58,14 +91,9 @@
                 <!-- Nội dung sự kiện -->
                 <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>Nội dung chương trình</h5>
                 <div class="text-secondary lh-lg mb-4">
-                    <p>
-                        @(Model?.MoTa ?? "Hội thảo nhằm mục đích tạo diễn đàn trao đổi học thuật chất lượng cao giữa các nhà khoa học, chuyên gia công nghệ và các hội viên trong cả nước.")
+                    <p style="white-space: pre-line;">
+                        @moTa
                     </p>
-                    <ul>
-                        <li>Ứng dụng mô hình học máy lớn trong nghiên cứu và chuyển đổi số.</li>
-                        <li>Đạo đức và an toàn trong phát triển hệ thống công nghệ thông tin.</li>
-                        <li>Kết nối chuyển giao công nghệ giữa viện nghiên cứu và doanh nghiệp.</li>
-                    </ul>
                 </div>
 
                 <!-- Khu vực nút Đăng ký tham gia -->

@@ -1,5 +1,7 @@
-﻿@{
+﻿@model IEnumerable<WNC15.Models.NguoiDung>
+@{
     ViewData["Title"] = "Xét duyệt hồ sơ gia nhập";
+    var tongSo = Model?.Count() ?? 0;
 }
 
 <div class="py-3">
@@ -19,7 +21,9 @@
 
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
-            <span class="badge bg-warning text-dark px-3 py-2">Hồ sơ đang chờ xử lý: <strong>2 hồ sơ</strong></span>
+            <span class="badge bg-warning text-dark px-3 py-2">
+                Hồ sơ đang chờ xử lý: <strong>@tongSo hồ sơ</strong>
+            </span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -34,63 +38,48 @@
                     </tr>
                 </thead>
                 <tbody class="small">
-                    <!-- Hồ sơ mẫu 1 -->
-                    <tr>
-                        <td class="ps-4">
-                            <strong class="text-dark d-block">Hoàng Văn Nam</strong>
-                            <span class="text-muted small">nam.hoang@vienkhoahoc.vn</span>
-                        </td>
-                        <td>0934 567 890</td>
-                        <td>Viện Nghiên cứu Điện tử & Tin học</td>
-                        <td>
-                            <div><strong>Nghiên cứu viên chính</strong></div>
-                            <small class="text-muted">Hệ thống nhúng & IoT</small>
-                        </td>
-                        <td>22/10/2026 08:30</td>
-                        <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="10" />
-                                    <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" onclick="return confirm('Xác nhận phê duyệt kết nạp hội viên này?');">
-                                        <i class="bi bi-check-lg me-1"></i> Phê duyệt
-                                    </button>
-                                </form>
-                                <button type="button" class="btn btn-outline-danger btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalTuChoi" onclick="setRejectId(10, 'Hoàng Văn Nam')">
-                                    <i class="bi bi-x-lg me-1"></i> Từ chối
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Hồ sơ mẫu 2 -->
-                    <tr>
-                        <td class="ps-4">
-                            <strong class="text-dark d-block">Vũ Thị Mai</strong>
-                            <span class="text-muted small">mai.vuthi@hust.edu.vn</span>
-                        </td>
-                        <td>0988 112 233</td>
-                        <td>Trường Đại học Bách Khoa Hà Nội</td>
-                        <td>
-                            <div><strong>Giảng viên / Thạc sĩ</strong></div>
-                            <small class="text-muted">Khoa học dữ liệu</small>
-                        </td>
-                        <td>22/10/2026 10:15</td>
-                        <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="11" />
-                                    <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" onclick="return confirm('Xác nhận phê duyệt kết nạp hội viên này?');">
-                                        <i class="bi bi-check-lg me-1"></i> Phê duyệt
-                                    </button>
-                                </form>
-                                <button type="button" class="btn btn-outline-danger btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalTuChoi" onclick="setRejectId(11, 'Vũ Thị Mai')">
-                                    <i class="bi bi-x-lg me-1"></i> Từ chối
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <strong class="text-dark d-block">@item.HoTen</strong>
+                                    <span class="text-muted small">@item.Email</span>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.SoDienThoai) ? "---" : item.SoDienThoai)</td>
+                                <td>@(string.IsNullOrEmpty(item.DonViCongTac) ? "---" : item.DonViCongTac)</td>
+                                <td>
+                                    <div><strong>@(string.IsNullOrEmpty(item.ChucDanh) ? "Chưa cập nhật" : item.ChucDanh)</strong></div>
+                                    <small class="text-muted">@(string.IsNullOrEmpty(item.LinhVuc) ? "Chưa cập nhật" : item.LinhVuc)</small>
+                                </td>
+                                <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                                            <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" onclick="return confirm('Xác nhận phê duyệt kết nạp hội viên: @item.HoTen?');">
+                                                <i class="bi bi-check-lg me-1"></i> Phê duyệt
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalTuChoi" onclick="setRejectId(@item.MaNguoiDung, '@item.HoTen')">
+                                            <i class="bi bi-x-lg me-1"></i> Từ chối
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                Hiện tại không có hồ sơ nào đang chờ xét duyệt.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

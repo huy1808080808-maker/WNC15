@@ -17,7 +17,16 @@
             </div>
 
             <div class="card-body p-4">
-                <form asp-controller="Event" asp-action="ThemSuKien" method="post" enctype="multipart/form-data">
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+                        <div>@ViewBag.ErrorMessage</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-controller="Event" asp-action="ThemSuKien" method="post">
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
@@ -39,15 +48,15 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Thời gian bắt đầu <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="startDate" class="form-control" required />
+                            <input type="datetime-local" name="startDate" class="form-control" value="@DateTime.Now.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" required />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Thời gian kết thúc</label>
-                            <input type="datetime-local" name="endDate" class="form-control" />
+                            <input type="datetime-local" name="endDate" class="form-control" value="@DateTime.Now.AddDays(7).AddHours(3).ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Hạn cuối đăng ký</label>
-                            <input type="datetime-local" name="deadlineDate" class="form-control" />
+                            <input type="datetime-local" name="deadlineDate" class="form-control" value="@DateTime.Now.AddDays(6).ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
                     </div>
 

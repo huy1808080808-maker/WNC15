@@ -1,5 +1,8 @@
-﻿@{
+﻿@model IEnumerable<WNC15.Models.NguoiDung>
+@{
     ViewData["Title"] = "Quản lý toàn bộ hội viên";
+    var soHoSoChoDuyet = ViewBag.SoHoSoChoDuyet ?? 0;
+    var tuKhoa = ViewBag.Keyword as string ?? "";
 }
 
 <div class="py-3">
@@ -12,7 +15,7 @@
         </div>
         <div>
             <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-warning fw-semibold text-dark shadow-sm">
-                <i class="bi bi-shield-lock-fill me-1"></i> Hồ sơ chờ duyệt (2)
+                <i class="bi bi-shield-lock-fill me-1"></i> Hồ sơ chờ duyệt (@soHoSoChoDuyet)
             </a>
         </div>
     </div>
@@ -24,7 +27,7 @@
                 <div class="col-md-9">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="keyword" class="form-control bg-light border-start-0" placeholder="Tìm kiếm theo họ tên, email hoặc đơn vị công tác..." />
+                        <input type="text" name="keyword" value="@tuKhoa" class="form-control bg-light border-start-0" placeholder="Tìm kiếm theo họ tên, email hoặc đơn vị công tác..." />
                     </div>
                 </div>
                 <div class="col-md-3 d-grid">
@@ -51,125 +54,94 @@
                     </tr>
                 </thead>
                 <tbody class="small">
-                    <!-- Hội viên 1: Đang hoạt động -->
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-person-circle fs-3 text-primary"></i>
-                                <div>
-                                    <strong class="text-dark d-block">Nguyễn Văn An</strong>
-                                    <span class="text-muted small">nguyenvanan@gmail.com</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>0912 345 678</td>
-                        <td>Trường Đại học Bách Khoa</td>
-                        <td>
-                            <div>Tiến sĩ / Giảng viên</div>
-                            <small class="text-muted">Khoa học máy tính</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-success-subtle text-success px-3 py-2">Đang hoạt động</span>
-                        </td>
-                        <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-1">
-                                <form asp-controller="AdminMember" asp-action="KhoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="1" />
-                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Khóa tài khoản" onclick="return confirm('Bạn có muốn khóa tài khoản này?');">
-                                        <i class="bi bi-lock-fill"></i> Khóa
-                                    </button>
-                                </form>
-                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="1" />
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-person-circle fs-3 @(item.VaiTro == "quan_tri" ? "text-danger" : "text-primary")"></i>
+                                        <div>
+                                            <strong class="text-dark d-block">
+                                                @item.HoTen
+                                                @if (item.VaiTro == "quan_tri")
+                                                {
+                                                    <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Quản trị viên</span>
+                                                }
+                                            </strong>
+                                            <span class="text-muted small">@item.Email</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.SoDienThoai) ? "---" : item.SoDienThoai)</td>
+                                <td>@(string.IsNullOrEmpty(item.DonViCongTac) ? "---" : item.DonViCongTac)</td>
+                                <td>
+                                    <div>@(string.IsNullOrEmpty(item.ChucDanh) ? "Chưa cập nhật" : item.ChucDanh)</div>
+                                    <small class="text-muted">@(string.IsNullOrEmpty(item.LinhVuc) ? "Chưa cập nhật" : item.LinhVuc)</small>
+                                </td>
+                                <td>
+                                    @if (item.TrangThai == "hoat_dong")
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-3 py-2">Đang hoạt động</span>
+                                    }
+                                    else if (item.TrangThai == "khoa")
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger px-3 py-2">Đang bị khóa</span>
+                                    }
+                                    else if (item.TrangThai == "tu_choi")
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2" title="@item.LyDoTuChoi">Bị từ chối</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning px-3 py-2">@item.TrangThai</span>
+                                    }
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        @if (item.TrangThai == "khoa")
+                                        {
+                                            <form asp-controller="AdminMember" asp-action="MoKhoaTaiKhoan" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                                                <button type="submit" class="btn btn-outline-success btn-sm" title="Mở khóa tài khoản" onclick="return confirm('Mở khóa tài khoản: @item.HoTen?');">
+                                                    <i class="bi bi-unlock-fill"></i> Mở khóa
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (item.TrangThai == "hoat_dong")
+                                        {
+                                            <form asp-controller="AdminMember" asp-action="KhoaTaiKhoan" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                                                <button type="submit" class="btn btn-outline-warning btn-sm" title="Khóa tài khoản" onclick="return confirm('Bạn có muốn tạm khóa tài khoản: @item.HoTen?');">
+                                                    <i class="bi bi-lock-fill"></i> Khóa
+                                                </button>
+                                            </form>
+                                        }
 
-                    <!-- Hội viên 2: Đang hoạt động -->
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-person-circle fs-3 text-success"></i>
-                                <div>
-                                    <strong class="text-dark d-block">Trần Thị Bình</strong>
-                                    <span class="text-muted small">tranbinh@viennghiencuu.vn</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>0987 654 321</td>
-                        <td>Viện Công nghệ & ĐMST</td>
-                        <td>
-                            <div>Chuyên gia dữ liệu</div>
-                            <small class="text-muted">AI & Big Data</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-success-subtle text-success px-3 py-2">Đang hoạt động</span>
-                        </td>
-                        <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-1">
-                                <form asp-controller="AdminMember" asp-action="KhoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="2" />
-                                    <button type="submit" class="btn btn-outline-warning btn-sm" title="Khóa tài khoản" onclick="return confirm('Bạn có muốn khóa tài khoản này?');">
-                                        <i class="bi bi-lock-fill"></i> Khóa
-                                    </button>
-                                </form>
-                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="2" />
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Hội viên 3: Bị tạm khóa -->
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-person-circle fs-3 text-secondary"></i>
-                                <div>
-                                    <strong class="text-dark d-block">Lê Minh Đức</strong>
-                                    <span class="text-muted small">duc.le@company.com</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>0903 999 888</td>
-                        <td>Công ty Công nghệ Alpha</td>
-                        <td>
-                            <div>Kỹ sư</div>
-                            <small class="text-muted">An ninh mạng</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-danger-subtle text-danger px-3 py-2">Đang bị khóa</span>
-                        </td>
-                        <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-1">
-                                <form asp-controller="AdminMember" asp-action="MoKhoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="3" />
-                                    <button type="submit" class="btn btn-outline-success btn-sm" title="Mở khóa tài khoản">
-                                        <i class="bi bi-unlock-fill"></i> Mở khóa
-                                    </button>
-                                </form>
-                                <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="3" />
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn tài khoản này?');">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+                                        <form asp-controller="AdminMember" asp-action="XoaTaiKhoan" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.MaNguoiDung" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa tài khoản" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn hồ sơ của @item.HoTen khỏi hệ thống?');">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                                Không tìm thấy hội viên nào phù hợp với điều kiện tìm kiếm.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

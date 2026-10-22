@@ -38,7 +38,7 @@
         <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
             <div class="card-body">
                 <i class="bi bi-people-fill text-primary fs-1 mb-2"></i>
-                <h3 class="fw-bold mb-1">500+</h3>
+                <h3 class="fw-bold mb-1">@(ViewBag.TongSoHoiVien != null ? ViewBag.TongSoHoiVien : "500")+</h3>
                 <p class="text-muted mb-0">Hội viên chính thức</p>
             </div>
         </div>
@@ -47,7 +47,7 @@
         <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
             <div class="card-body">
                 <i class="bi bi-calendar-check-fill text-success fs-1 mb-2"></i>
-                <h3 class="fw-bold mb-1">50+</h3>
+                <h3 class="fw-bold mb-1">@(ViewBag.TongSoSuKien != null ? ViewBag.TongSoSuKien : "50")+</h3>
                 <p class="text-muted mb-0">Hội thảo & Sự kiện chuyên môn</p>
             </div>
         </div>
@@ -56,7 +56,7 @@
         <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100">
             <div class="card-body">
                 <i class="bi bi-journal-richtext text-warning fs-1 mb-2"></i>
-                <h3 class="fw-bold mb-1">200+</h3>
+                <h3 class="fw-bold mb-1">@(ViewBag.TongSoBaiViet != null ? ViewBag.TongSoBaiViet : "200")+</h3>
                 <p class="text-muted mb-0">Bài viết & Công trình nghiên cứu</p>
             </div>
         </div>
