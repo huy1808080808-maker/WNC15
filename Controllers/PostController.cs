@@ -118,7 +118,7 @@ namespace WNC15.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,quan_tri")]
-        public IActionResult ThemTinTuc(string title, int categoryId, string summary, string content)
+        public IActionResult ThemTinTuc(string title, int categoryId, string summary, string content, IFormFile thumbnail)
         {
             if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
             {
@@ -141,12 +141,22 @@ namespace WNC15.Controllers
                 categoryId = dmDau != null ? dmDau.MaDanhMuc : 1;
             }
 
+            // Xử lý lưu ảnh đại diện nếu có tải lên
+            string duongDanAnh = LuuAnhDaiDien(thumbnail);
+
+            string tomTat = "";
+            if (!string.IsNullOrWhiteSpace(summary))
+            {
+                tomTat = summary.Trim();
+            }
+
             var baiVietMoi = new BaiViet
             {
                 TieuDe = title.Trim(),
                 MaDanhMuc = categoryId,
-                TomTat = summary?.Trim(),
+                TomTat = tomTat,
                 NoiDung = content,
+                AnhDaiDien = duongDanAnh,
                 MaTacGia = maTacGia,
                 TrangThai = "da_dang",
                 LuotXem = 1,
@@ -184,7 +194,7 @@ namespace WNC15.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,quan_tri")]
-        public IActionResult SuaTinTuc(int id, string title, int categoryId, string summary, string content, string status)
+        public IActionResult SuaTinTuc(int id, string title, int categoryId, string summary, string content, string status, IFormFile thumbnail)
         {
             var baiViet = _context.BaiViets.Find(id);
             if (baiViet == null)
@@ -201,11 +211,26 @@ namespace WNC15.Controllers
 
             baiViet.TieuDe = title.Trim();
             baiViet.MaDanhMuc = categoryId > 0 ? categoryId : 1;
-            baiViet.TomTat = summary?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(summary))
+            {
+                baiViet.TomTat = summary.Trim();
+            }
+
             baiViet.NoiDung = content;
             if (!string.IsNullOrEmpty(status))
             {
                 baiViet.TrangThai = status;
+            }
+
+            // Cập nhật ảnh đại diện mới nếu có tải lên
+            if (thumbnail != null && thumbnail.Length > 0)
+            {
+                string duongDanAnh = LuuAnhDaiDien(thumbnail);
+                if (!string.IsNullOrEmpty(duongDanAnh))
+                {
+                    baiViet.AnhDaiDien = duongDanAnh;
+                }
             }
 
             _context.SaveChanges();
@@ -303,6 +328,40 @@ namespace WNC15.Controllers
                     NgayTao = DateTime.Now
                 });
                 _context.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// Lưu file ảnh tải lên vào thư mục wwwroot/uploads/posts/
+        /// </summary>
+        private string LuuAnhDaiDien(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return "";
+            }
+
+            try
+            {
+                var thuMucUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "posts");
+                if (!Directory.Exists(thuMucUpload))
+                {
+                    Directory.CreateDirectory(thuMucUpload);
+                }
+
+                var tenFile = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                var duongDanVatLy = Path.Combine(thuMucUpload, tenFile);
+
+                using (var stream = new FileStream(duongDanVatLy, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                return "/uploads/posts/" + tenFile;
+            }
+            catch
+            {
+                return "";
             }
         }
 

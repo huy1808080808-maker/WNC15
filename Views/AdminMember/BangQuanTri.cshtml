@@ -1,11 +1,17 @@
 @model IEnumerable<WNC15.Models.BaiViet>
 @{
     ViewData["Title"] = "Bảng Điều Khiển Quản Trị (Admin Dashboard)";
+
     var dsChoDuyet = ViewBag.DsChoDuyet as IEnumerable<WNC15.Models.NguoiDung> ?? new List<WNC15.Models.NguoiDung>();
+
     int tongHoiVien = ViewBag.TongHoiVien ?? 0;
+
     int soHoSoChoDuyet = ViewBag.SoHoSoChoDuyet ?? 0;
+
     int tongBaiViet = ViewBag.TongBaiViet ?? 0;
+
     int tongSuKien = ViewBag.TongSuKien ?? 0;
+
     int tongLuotDangKy = ViewBag.TongLuotDangKy ?? 0;
 }
 
@@ -17,7 +23,8 @@
                 <i class="bi bi-shield-lock-fill me-1"></i>Hệ thống Quản Trị Viên
             </span>
             <h2 class="fw-bold text-dark mb-1">Bảng Điều Khiển Quản Trị (Admin Dashboard)</h2>
-            <p class="text-muted small mb-0">Trung tâm quản lý hội viên, kiểm duyệt bài viết và điều hành các hoạt động Hiệp hội</p>
+            <p class="text-muted small mb-0">Trung tâm quản lý hội viên, kiểm duyệt bài viết và điều hành các hoạt động
+                Hiệp hội</p>
         </div>
         <div class="d-flex gap-2 mt-2 mt-md-0">
             <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-primary fw-semibold shadow-sm">
@@ -44,7 +51,8 @@
                     </div>
                 </div>
                 <h3 class="fw-bold text-dark mb-2">@tongHoiVien</h3>
-                <a asp-controller="AdminMember" asp-action="DanhSachHoiVien" class="text-decoration-none small text-primary fw-semibold">
+                <a asp-controller="AdminMember" asp-action="DanhSachHoiVien"
+                    class="text-decoration-none small text-primary fw-semibold">
                     Quản lý danh sách <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -60,7 +68,8 @@
                     </div>
                 </div>
                 <h3 class="fw-bold text-warning-emphasis mb-2" id="kpiChoDuyet">@soHoSoChoDuyet</h3>
-                <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="text-decoration-none small text-warning-emphasis fw-semibold">
+                <a asp-controller="AdminMember" asp-action="HoSoChoDuyet"
+                    class="text-decoration-none small text-warning-emphasis fw-semibold">
                     Xem hồ sơ cần duyệt <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -92,7 +101,8 @@
                     </div>
                 </div>
                 <h3 class="fw-bold text-dark mb-2">@tongSuKien</h3>
-                <a asp-controller="Event" asp-action="DanhSachSuKien" class="text-decoration-none small text-info fw-semibold">
+                <a asp-controller="Event" asp-action="DanhSachSuKien"
+                    class="text-decoration-none small text-info fw-semibold">
                     @tongLuotDangKy lượt hội viên đăng ký <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -119,7 +129,8 @@
                 <div class="col-md-6">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchPostInput" class="form-control" placeholder="Tìm kiếm theo tiêu đề, tác giả hoặc tóm tắt..." />
+                        <input type="text" id="searchPostInput" class="form-control"
+                            placeholder="Tìm kiếm theo tiêu đề, tác giả hoặc tóm tắt..." />
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -131,7 +142,8 @@
                     </select>
                 </div>
                 <div class="col-md-2 text-md-end">
-                    <span class="badge bg-secondary-subtle text-secondary" id="postCountBadge">Tổng số: @(Model?.Count() ?? 0) bài</span>
+                    <span class="badge bg-secondary-subtle text-secondary" id="postCountBadge">Tổng số: @(Model?.Count()
+                        ?? 0) bài</span>
                 </div>
             </div>
         </div>
@@ -151,20 +163,21 @@
                 </thead>
                 <tbody class="small" id="tbodyBaiViet">
                     @if (Model != null && Model.Any())
+
                     {
+
                         foreach (var post in Model)
+
                         {
                             var tenDm = post.DanhMuc != null ? post.DanhMuc.TenDanhMuc : "Tin tức chung";
                             var tenTg = post.TacGia != null ? post.TacGia.HoTen : "Ban Quản Trị";
-                            <tr id="row-post-@post.MaBaiViet"
-                                class="post-item-row"
-                                data-title="@(post.TieuDe?.ToLower() ?? "")"
-                                data-category="@tenDm.ToLower()"
-                                data-author="@tenTg.ToLower()"
+                            <tr id="row-post-@post.MaBaiViet" class="post-item-row" data-title="@(post.TieuDe?.ToLower() ?? "")"
+                                data-category="@tenDm.ToLower()" data-author="@tenTg.ToLower()"
                                 data-summary="@(post.TomTat?.ToLower() ?? "")">
                                 <td class="ps-4" style="max-width: 320px;">
                                     <strong class="text-dark d-block text-truncate" title="@post.TieuDe">@post.TieuDe</strong>
-                                    <span class="text-muted small text-truncate d-block">@(string.IsNullOrEmpty(post.TomTat) ? "Không có tóm tắt" : post.TomTat)</span>
+                                    <span class="text-muted small text-truncate d-block">@(string.IsNullOrEmpty(post.TomTat) ?
+                                "Không có tóm tắt" : post.TomTat)</span>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
@@ -176,18 +189,23 @@
                                 <td><span class="badge bg-secondary-subtle text-secondary">@post.LuotXem</span></td>
                                 <td class="text-center" id="status-cell-@post.MaBaiViet">
                                     @if (post.TrangThai == "da_dang")
+
                                     {
                                         <span class="badge bg-success-subtle text-success px-2 py-1">
                                             <i class="bi bi-check-circle-fill me-1"></i>Đã xuất bản
                                         </span>
                                     }
+
                                     else if (post.TrangThai == "an")
+
                                     {
                                         <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
                                             <i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn
                                         </span>
                                     }
+
                                     else
+
                                     {
                                         <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1">
                                             <i class="bi bi-clock-fill me-1"></i>Chờ duyệt
@@ -197,42 +215,54 @@
                                 <td class="text-center pe-4">
                                     <div class="d-flex justify-content-center gap-1" id="action-cell-@post.MaBaiViet">
                                         <!-- Nút Xem trước bài viết -->
-                                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="@post.MaBaiViet" class="btn btn-outline-info btn-sm px-2" target="_blank" title="Xem trước bài viết">
+                                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="@post.MaBaiViet"
+                                            class="btn btn-outline-info btn-sm px-2" target="_blank" title="Xem trước bài viết">
                                             <i class="bi bi-box-arrow-up-right"></i>
                                         </a>
 
                                         <!-- Nút SỬA BÀI VIẾT (Admin) -->
-                                        <a asp-controller="Post" asp-action="SuaTinTuc" asp-route-id="@post.MaBaiViet" class="btn btn-outline-primary btn-sm px-2" title="Chỉnh sửa bài viết này">
+                                        <a asp-controller="Post" asp-action="SuaTinTuc" asp-route-id="@post.MaBaiViet"
+                                            class="btn btn-outline-primary btn-sm px-2" title="Chỉnh sửa bài viết này">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
                                         <!-- Nút Duyệt xuất bản hoặc Ẩn bài viết -->
                                         @if (post.TrangThai == "da_dang")
+
                                         {
-                                            <form asp-controller="AdminMember" asp-action="AnBaiViet" method="post" class="d-inline form-toggle-post-ajax">
+                                            <form asp-controller="AdminMember" asp-action="AnBaiViet" method="post"
+                                                class="d-inline form-toggle-post-ajax">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@post.MaBaiViet" />
-                                                <button type="submit" class="btn btn-outline-warning btn-sm px-2" title="Ẩn bài viết khỏi trang chủ">
+                                                <button type="submit" class="btn btn-outline-warning btn-sm px-2"
+                                                    title="Ẩn bài viết khỏi trang chủ">
                                                     <i class="bi bi-eye-slash me-1"></i> Ẩn
                                                 </button>
                                             </form>
                                         }
+
                                         else
+
                                         {
-                                            <form asp-controller="AdminMember" asp-action="DuyetBaiViet" method="post" class="d-inline form-toggle-post-ajax">
+                                            <form asp-controller="AdminMember" asp-action="DuyetBaiViet" method="post"
+                                                class="d-inline form-toggle-post-ajax">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@post.MaBaiViet" />
-                                                <button type="submit" class="btn btn-success btn-sm px-2 shadow-sm" title="Duyệt và xuất bản ngay">
+                                                <button type="submit" class="btn btn-success btn-sm px-2 shadow-sm"
+                                                    title="Duyệt và xuất bản ngay">
                                                     <i class="bi bi-check-lg me-1"></i> Duyệt
                                                 </button>
                                             </form>
                                         }
 
                                         <!-- Nút Xóa bài viết -->
-                                        <form asp-controller="AdminMember" asp-action="XoaBaiViet" method="post" class="d-inline form-delete-post-ajax">
+                                        <form asp-controller="AdminMember" asp-action="XoaBaiViet" method="post"
+                                            class="d-inline form-delete-post-ajax">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@post.MaBaiViet" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm px-2" onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');" title="Xóa bài viết">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm px-2"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');"
+                                                title="Xóa bài viết">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -240,8 +270,11 @@
                                 </td>
                             </tr>
                         }
+
                     }
+
                     else
+
                     {
                         <tr>
                             <td colspan="7" class="text-center py-4 text-muted">Chưa có bài viết nào trong hệ thống.</td>
@@ -261,7 +294,8 @@
                 </h5>
                 <small class="text-muted">Các đơn đăng ký mới nhất cần ban quản trị xét duyệt kết nạp</small>
             </div>
-            <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-outline-warning btn-sm fw-semibold text-dark">
+            <a asp-controller="AdminMember" asp-action="HoSoChoDuyet"
+                class="btn btn-outline-warning btn-sm fw-semibold text-dark">
                 Xem toàn bộ (@soHoSoChoDuyet hồ sơ) <i class="bi bi-arrow-right"></i>
             </a>
         </div>
@@ -280,8 +314,11 @@
                 </thead>
                 <tbody class="small" id="tbodyQuickHoSo">
                     @if (dsChoDuyet.Any())
+
                     {
+
                         foreach (var m in dsChoDuyet)
+
                         {
                             <tr id="row-quick-member-@m.MaNguoiDung">
                                 <td class="ps-4">
@@ -291,26 +328,33 @@
                                 <td>@(string.IsNullOrEmpty(m.SoDienThoai) ? "---" : m.SoDienThoai)</td>
                                 <td>@(string.IsNullOrEmpty(m.DonViCongTac) ? "---" : m.DonViCongTac)</td>
                                 <td>
-                                    <div><strong>@(string.IsNullOrEmpty(m.ChucDanh) ? "Chưa cập nhật" : m.ChucDanh)</strong></div>
-                                    <small class="text-muted">@(string.IsNullOrEmpty(m.LinhVuc) ? "Chưa cập nhật" : m.LinhVuc)</small>
+                                    <div><strong>@(string.IsNullOrEmpty(m.ChucDanh) ? "Chưa cập nhật" : m.ChucDanh)</strong>
+                                    </div>
+                                    <small class="text-muted">@(string.IsNullOrEmpty(m.LinhVuc) ? "Chưa cập nhật" :
+                                m.LinhVuc)</small>
                                 </td>
                                 <td>@m.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="text-center pe-4">
-                                    <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline form-quick-phe-duyet-ajax">
+                                    <form asp-controller="AdminMember" asp-action="PheDuyet" method="post"
+                                        class="d-inline form-quick-phe-duyet-ajax">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@m.MaNguoiDung" />
                                         <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm">
                                             <i class="bi bi-check-lg me-1"></i> Phê duyệt
                                         </button>
                                     </form>
-                                    <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-outline-secondary btn-sm px-2">
+                                    <a asp-controller="AdminMember" asp-action="HoSoChoDuyet"
+                                        class="btn btn-outline-secondary btn-sm px-2">
                                         Chi tiết
                                     </a>
                                 </td>
                             </tr>
                         }
+
                     }
+
                     else
+
                     {
                         <tr>
                             <td colspan="6" class="text-center py-4 text-muted">
@@ -334,11 +378,11 @@
                 var iconAlert = thanhCong ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
 
                 var htmlAlert = `
-                    <div class="alert ${loaiAlert} alert-dismissible fade show shadow-sm d-flex align-items-center mb-3" role="alert">
-                        <i class="bi ${iconAlert} fs-5 me-2"></i>
-                        <div>${noiDung}</div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>`;
+                        <div class="alert ${loaiAlert} alert-dismissible fade show shadow-sm d-flex align-items-center mb-3" role="alert">
+                            <i class="bi ${iconAlert} fs-5 me-2"></i>
+                            <div>${noiDung}</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
 
                 $('#dashboardAlert').html(htmlAlert);
                 setTimeout(function () {
@@ -368,9 +412,9 @@
                             if (res.trangThai === "da_dang") {
                                 // Cập nhật badge
                                 $('#status-cell-' + postId).html(`
-                                    <span class="badge bg-success-subtle text-success px-2 py-1">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Đã xuất bản
-                                    </span>`);
+                                        <span class="badge bg-success-subtle text-success px-2 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Đã xuất bản
+                                        </span>`);
 
                                 // Cập nhật nút bấm thành nút Ẩn
                                 form.attr('action', '/AdminMember/AnBaiViet');
@@ -378,9 +422,9 @@
                             } else {
                                 // Cập nhật badge
                                 $('#status-cell-' + postId).html(`
-                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
-                                        <i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn
-                                    </span>`);
+                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                            <i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn
+                                        </span>`);
 
                                 // Cập nhật nút bấm thành nút Duyệt
                                 form.attr('action', '/AdminMember/DuyetBaiViet');

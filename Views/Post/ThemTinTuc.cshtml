@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Đăng bài viết mới";
 }
 
@@ -36,7 +36,15 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Ảnh đại diện bài viết</label>
-                            <input type="file" name="thumbnail" class="form-control" accept="image/*" />
+                            <input type="file" name="thumbnail" id="inputThumbnail" class="form-control" accept="image/*" />
+                            <div class="mt-2 d-flex align-items-center gap-3">
+                                <img id="imgPreview" 
+                                     src="https://placehold.co/160x100?text=Chua+Co+Anh" 
+                                     alt="Ảnh xem trước" 
+                                     class="rounded-3 border shadow-sm" 
+                                     style="width: 160px; height: 100px; object-fit: cover;" />
+                                <small class="text-muted">Xem trước ảnh đại diện khi chọn tệp.</small>
+                            </div>
                         </div>
                     </div>
 
@@ -63,3 +71,20 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        var inputThumbnail = document.getElementById('inputThumbnail');
+        if (inputThumbnail) {
+            inputThumbnail.addEventListener('change', function (e) {
+                if (e.target.files && e.target.files.length > 0) {
+                    var file = e.target.files[0];
+                    var imgPreview = document.getElementById('imgPreview');
+                    if (imgPreview) {
+                        imgPreview.src = URL.createObjectURL(file);
+                    }
+                }
+            });
+        }
+    </script>
+}
