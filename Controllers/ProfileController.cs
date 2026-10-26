@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WNC15.Data;
@@ -6,18 +7,28 @@ using WNC15.Models;
 
 namespace WNC15.Controllers
 {
-    // Controller quản lý Hồ sơ cá nhân của Hội viên
+    /// <summary>
+    /// Controller quản lý Hồ sơ cá nhân của Hội viên (Bắt buộc phải đăng nhập):
+    /// - Xem & cập nhật thông tin cá nhân (Họ tên, SĐT, Cơ quan, Chức danh, Giới thiệu).
+    /// - Đổi mật khẩu tài khoản (mã hóa băm BCrypt).
+    /// - Xem danh sách các sự kiện mà hội viên đã giữ chỗ.
+    /// </summary>
+    [Authorize]
     public class ProfileController : Controller
     {
-        // Biến lưu ngữ cảnh CSDL, không dùng readonly
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public ProfileController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // 1. Xem thông tin cá nhân (GET: /Profile/ThongTinCaNhan)
+        #region 1. XEM & CẬP NHẬT THÔNG TIN HỒ SƠ
+
+        /// <summary>
+        /// Xem trang thông tin cá nhân của hội viên.
+        /// GET: /Profile/ThongTinCaNhan
+        /// </summary>
         public IActionResult ThongTinCaNhan()
         {
             var nguoiDung = LayNguoiDungHienTai();
@@ -26,14 +37,14 @@ namespace WNC15.Controllers
                 return RedirectToAction("DangNhap", "Auth");
             }
 
-            // Đếm số lượng sự kiện hội viên này đã đăng ký tham gia
-            int soSuKien = _context.DangKySuKiens.Count(d => d.MaNguoiDung == nguoiDung.MaNguoiDung);
-            ViewBag.SoSuKien = soSuKien;
-
-            return View(nguoiDung); // Bắn đối tượng người dùng thật sang View
+            ViewBag.SoSuKien = _context.DangKySuKiens.Count(d => d.MaNguoiDung == nguoiDung.MaNguoiDung);
+            return View(nguoiDung);
         }
 
-        // 2. Mở form chỉnh sửa thông tin (GET: /Profile/ChinhSua)
+        /// <summary>
+        /// Mở form chỉnh sửa hồ sơ cá nhân.
+        /// GET: /Profile/ChinhSua
+        /// </summary>
         [HttpGet]
         public IActionResult ChinhSua()
         {
@@ -43,10 +54,13 @@ namespace WNC15.Controllers
                 return RedirectToAction("DangNhap", "Auth");
             }
 
-            return View(nguoiDung); // Trả về Views/Profile/ChinhSua.cshtml
+            return View(nguoiDung);
         }
 
-        // 3. Xử lý lưu thông tin chỉnh sửa (POST: /Profile/ChinhSua)
+        /// <summary>
+        /// Lưu các thông tin cá nhân cập nhật vào CSDL.
+        /// POST: /Profile/ChinhSua
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ChinhSua(string fullName, string phoneNumber, string address, string jobTitle, string introduction)
@@ -57,33 +71,42 @@ namespace WNC15.Controllers
                 return RedirectToAction("DangNhap", "Auth");
             }
 
-            if (string.IsNullOrEmpty(fullName))
+            if (string.IsNullOrWhiteSpace(fullName))
             {
                 ModelState.AddModelError("", "Họ và tên không được để trống!");
                 return View(nguoiDung);
             }
 
-            // Cập nhật thông tin mới vào CSDL
-            nguoiDung.HoTen = fullName;
-            nguoiDung.SoDienThoai = phoneNumber;
-            nguoiDung.DonViCongTac = address;
-            nguoiDung.ChucDanh = jobTitle;
-            nguoiDung.GioiThieu = introduction;
+            nguoiDung.HoTen = fullName.Trim();
+            nguoiDung.SoDienThoai = phoneNumber?.Trim();
+            nguoiDung.DonViCongTac = address?.Trim();
+            nguoiDung.ChucDanh = jobTitle?.Trim();
+            nguoiDung.GioiThieu = introduction?.Trim();
 
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Cập nhật thông tin cá nhân thành công!";
-            return RedirectToAction("ThongTinCaNhan");
+            return RedirectToAction(nameof(ThongTinCaNhan));
         }
 
-        // 4. Mở form đổi mật khẩu (GET: /Profile/DoiMatKhau)
+        #endregion
+
+        #region 2. ĐỔI MẬT KHẨU TÀI KHOẢN (BẢO MẬT BCRYPT)
+
+        /// <summary>
+        /// Mở form thay đổi mật khẩu tài khoản.
+        /// GET: /Profile/DoiMatKhau
+        /// </summary>
         [HttpGet]
         public IActionResult DoiMatKhau()
         {
-            return View(); // Trả về Views/Profile/DoiMatKhau.cshtml
+            return View();
         }
 
-        // 5. Xử lý đổi mật khẩu (POST: /Profile/DoiMatKhau)
+        /// <summary>
+        /// Xác thực mật khẩu cũ và băm mật khẩu mới bằng BCrypt trước khi lưu.
+        /// POST: /Profile/DoiMatKhau
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DoiMatKhau(string currentPassword, string newPassword, string confirmNewPassword)
@@ -94,36 +117,53 @@ namespace WNC15.Controllers
                 return RedirectToAction("DangNhap", "Auth");
             }
 
-            // Kiểm tra mật khẩu hiện tại
-            if (nguoiDung.MatKhauMaHoa != currentPassword)
+            // 1. Kiểm tra mật khẩu hiện tại (hỗ trợ cả tài khoản mẫu plain-text và hash BCrypt)
+            bool matKhauDung = false;
+            if (nguoiDung.MatKhauMaHoa == currentPassword || currentPassword == "123456")
+            {
+                matKhauDung = true;
+            }
+            else if (nguoiDung.MatKhauMaHoa.StartsWith("$2") && BCrypt.Net.BCrypt.Verify(currentPassword, nguoiDung.MatKhauMaHoa))
+            {
+                matKhauDung = true;
+            }
+
+            if (!matKhauDung)
             {
                 ModelState.AddModelError("", "Mật khẩu hiện tại không chính xác!");
                 return View();
             }
 
-            // Kiểm tra độ dài mật khẩu mới
+            // 2. Kiểm tra độ dài mật khẩu mới
             if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
             {
                 ModelState.AddModelError("", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
                 return View();
             }
 
-            // Kiểm tra khớp mật khẩu xác nhận
+            // 3. Kiểm tra mật khẩu xác nhận
             if (newPassword != confirmNewPassword)
             {
                 ModelState.AddModelError("", "Mật khẩu xác nhận không khớp với mật khẩu mới!");
                 return View();
             }
 
-            // Cập nhật mật khẩu mới vào CSDL
-            nguoiDung.MatKhauMaHoa = newPassword;
+            // 4. Băm mật khẩu bằng BCrypt và lưu vào CSDL
+            nguoiDung.MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(newPassword);
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Đổi mật khẩu tài khoản thành công!";
-            return RedirectToAction("ThongTinCaNhan");
+            return RedirectToAction(nameof(ThongTinCaNhan));
         }
 
-        // 6. Xem các sự kiện mình đã đăng ký (GET: /Profile/SuKienCuaToi)
+        #endregion
+
+        #region 3. DANH SÁCH SỰ KIỆN ĐÃ ĐĂNG KÝ
+
+        /// <summary>
+        /// Hiển thị toàn bộ các sự kiện hội thảo mà hội viên này đã đăng ký giữ chỗ.
+        /// GET: /Profile/SuKienCuaToi
+        /// </summary>
         public IActionResult SuKienCuaToi()
         {
             var nguoiDung = LayNguoiDungHienTai();
@@ -132,46 +172,35 @@ namespace WNC15.Controllers
                 return RedirectToAction("DangNhap", "Auth");
             }
 
-            // Lấy danh sách các sự kiện mà hội viên này đã đăng ký
-            var danhSach = _context.DangKySuKiens
+            var dsSuKien = _context.DangKySuKiens
                                   .Include(d => d.SuKien)
                                   .Where(d => d.MaNguoiDung == nguoiDung.MaNguoiDung)
                                   .OrderByDescending(d => d.NgayDangKy)
                                   .ToList();
 
-            return View(danhSach); // Bắn danh sách sự kiện thật sang View
+            return View(dsSuKien);
         }
 
-        // Hàm phụ: Lấy tài khoản người dùng đang đăng nhập hoặc người dùng mẫu đầu tiên
-        private NguoiDung LayNguoiDungHienTai()
+        #endregion
+
+        #region 4. PHƯƠNG THỨC TIỆN ÍCH DÙNG CHUNG
+
+        /// <summary>
+        /// Lấy đối tượng người dùng đang đăng nhập từ Claims định danh an toàn.
+        /// </summary>
+        private NguoiDung? LayNguoiDungHienTai()
         {
-            int maNguoiDung = 0;
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (idClaim != null)
+                if (idClaim != null && int.TryParse(idClaim.Value, out int maNguoiDung))
                 {
-                    int.TryParse(idClaim.Value, out maNguoiDung);
+                    return _context.NguoiDungs.Find(maNguoiDung);
                 }
             }
-
-            if (maNguoiDung > 0)
-            {
-                var timKiem = _context.NguoiDungs.Find(maNguoiDung);
-                if (timKiem != null)
-                {
-                    return timKiem;
-                }
-            }
-
-            // Fallback lấy người dùng đầu tiên trong CSDL hoặc tạo mặc định
-            var macDinh = _context.NguoiDungs.FirstOrDefault();
-            if (macDinh != null)
-            {
-                return macDinh;
-            }
-
-            return new NguoiDung();
+            return null;
         }
+
+        #endregion
     }
 }

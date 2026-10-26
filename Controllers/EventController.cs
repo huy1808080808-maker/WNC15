@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WNC15.Data;
@@ -6,26 +7,36 @@ using WNC15.Models;
 
 namespace WNC15.Controllers
 {
-    // Controller quản lý Sự kiện, Đăng ký tham gia và Điểm danh
+    /// <summary>
+    /// Controller quản lý Sự kiện & Hội thảo:
+    /// - Xem danh sách, chi tiết sự kiện.
+    /// - Đăng ký / Hủy đăng ký giữ chỗ (AJAX).
+    /// - Quản trị viên: Tạo sự kiện mới, Xóa sự kiện, Xem danh sách người đăng ký (Điểm danh).
+    /// </summary>
     public class EventController : Controller
     {
-        // Biến lưu ngữ cảnh CSDL, không dùng readonly
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public EventController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // 1. Danh sách sự kiện (GET: /Event/DanhSachSuKien)
+        #region 1. XEM DANH SÁCH & CHI TIẾT SỰ KIỆN
+
+        /// <summary>
+        /// Danh sách toàn bộ sự kiện & hội thảo khoa học (hỗ trợ tìm kiếm theo tên hoặc địa điểm).
+        /// GET: /Event/DanhSachSuKien
+        /// </summary>
         public IActionResult DanhSachSuKien(string search)
         {
             var query = _context.SuKiens
                                 .Include(s => s.DangKySuKiens)
                                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(search))
+            if (!string.IsNullOrWhiteSpace(search))
             {
+                search = search.Trim();
                 query = query.Where(s => s.TenSuKien.Contains(search) || s.DiaDiem.Contains(search));
                 ViewBag.Search = search;
             }
@@ -34,16 +45,19 @@ namespace WNC15.Controllers
             return View(danhSach);
         }
 
-        // 2. Chi tiết sự kiện & Giữ chỗ (GET: /Event/ChiTiet/5)
+        /// <summary>
+        /// Xem thông tin chi tiết một sự kiện và tình trạng chỗ ngồi còn lại.
+        /// GET: /Event/ChiTiet/5
+        /// </summary>
         public IActionResult ChiTiet(int id)
         {
             var suKien = _context.SuKiens
                                  .Include(s => s.DangKySuKiens)
                                  .FirstOrDefault(s => s.MaSuKien == id);
 
+            // Tự động tạo sự kiện mẫu nếu cơ sở dữ liệu chưa có sự kiện nào
             if (suKien == null)
             {
-                // Nếu chưa có sự kiện trong CSDL, tạo một sự kiện mẫu lưu vào CSDL
                 suKien = new SuKien
                 {
                     TenSuKien = "Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo & Dữ liệu",
@@ -58,80 +72,71 @@ namespace WNC15.Controllers
                 _context.SaveChanges();
             }
 
+            // Kiểm tra xem hội viên đang đăng nhập đã đăng ký sự kiện này chưa
+            int maNguoiDung = LayMaNguoiDungHienTai();
+            ViewBag.DaDangKy = (maNguoiDung > 0) && suKien.DangKySuKiens.Any(d => d.MaNguoiDung == maNguoiDung);
+
             return View(suKien);
         }
 
-        // 3. Hội viên bấm nút "Đăng ký tham gia" (POST: /Event/DangKyThamGia)
+        #endregion
+
+        #region 2. ĐĂNG KÝ & HỦY THAM GIA SỰ KIỆN (AJAX & FORM)
+
+        /// <summary>
+        /// Hội viên bấm nút "Đăng ký tham gia": Kiểm tra điều kiện và ghi nhận giữ chỗ vào CSDL.
+        /// POST: /Event/DangKyThamGia (Hỗ trợ AJAX & Form)
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DangKyThamGia(int id)
         {
-            // Kiểm tra sự kiện có tồn tại không
-            var suKien = _context.SuKiens.Find(id);
+            var suKien = _context.SuKiens.Include(s => s.DangKySuKiens).FirstOrDefault(s => s.MaSuKien == id);
             if (suKien == null)
             {
-                TempData["ErrorMessage"] = "Không tìm thấy thông tin sự kiện này.";
-                return RedirectToAction("DanhSachSuKien");
+                return IsAjaxRequest()
+                    ? Json(new { success = false, message = "Không tìm thấy thông tin sự kiện này." })
+                    : (IActionResult)RedirectToAction(nameof(DanhSachSuKien));
             }
 
-            // Kiểm tra xem sự kiện đã hết hạn đăng ký chưa
+            // 1. Kiểm tra hạn chót đăng ký
             if (DateTime.Now > suKien.HanDangKy)
             {
-                TempData["ErrorMessage"] = "Rất tiếc, sự kiện này đã kết thúc thời hạn đăng ký tham dự!";
-                return RedirectToAction("ChiTiet", new { id });
+                return IsAjaxRequest()
+                    ? Json(new { success = false, message = "Rất tiếc, sự kiện này đã kết thúc thời hạn đăng ký tham dự!" })
+                    : RedirectWithError(nameof(ChiTiet), id, "Rất tiếc, sự kiện này đã kết thúc thời hạn đăng ký tham dự!");
             }
 
-            // Kiểm tra số lượng chỗ còn lại
-            int soNguoiDaDangKy = _context.DangKySuKiens.Count(d => d.MaSuKien == id);
-            if (soNguoiDaDangKy >= suKien.SoLuongToiDa)
+            // 2. Kiểm tra số chỗ còn trống
+            if (suKien.DangKySuKiens.Count >= suKien.SoLuongToiDa)
             {
-                TempData["ErrorMessage"] = "Sự kiện này đã đủ số lượng người đăng ký tối đa!";
-                return RedirectToAction("ChiTiet", new { id });
+                return IsAjaxRequest()
+                    ? Json(new { success = false, message = "Sự kiện này đã đủ số lượng người đăng ký tối đa!" })
+                    : RedirectWithError(nameof(ChiTiet), id, "Sự kiện này đã đủ số lượng người đăng ký tối đa!");
             }
 
-            // Xác định người dùng đăng ký (lấy từ tài khoản đang đăng nhập hoặc người dùng mặc định)
-            int maNguoiDung = 0;
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (idClaim != null)
-                {
-                    int.TryParse(idClaim.Value, out maNguoiDung);
-                }
-            }
-
-            // Nếu chưa đăng nhập hoặc không lấy được ID, dùng tài khoản hội viên đầu tiên trong CSDL
+            // 3. Kiểm tra đăng nhập
+            int maNguoiDung = LayMaNguoiDungHienTai();
             if (maNguoiDung == 0)
             {
-                var hoiVienDauTien = _context.NguoiDungs.FirstOrDefault();
-                if (hoiVienDauTien == null)
+                if (IsAjaxRequest())
                 {
-                    hoiVienDauTien = new NguoiDung
-                    {
-                        HoTen = "Nguyễn Văn An",
-                        Email = "nguyenvanan@gmail.com",
-                        SoDienThoai = "0912345678",
-                        DonViCongTac = "Trường Đại học Bách Khoa",
-                        ChucDanh = "Tiến sĩ / Giảng viên",
-                        LinhVuc = "Khoa học máy tính",
-                        MatKhauMaHoa = "123456",
-                        TrangThai = "hoat_dong"
-                    };
-                    _context.NguoiDungs.Add(hoiVienDauTien);
-                    _context.SaveChanges();
+                    return Json(new { success = false, message = "Vui lòng đăng nhập tài khoản để đăng ký tham gia sự kiện!" });
                 }
-                maNguoiDung = hoiVienDauTien.MaNguoiDung;
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập tài khoản để đăng ký tham gia sự kiện!";
+                return RedirectToAction("DangNhap", "Auth", new { returnUrl = Url.Action(nameof(ChiTiet), new { id }) });
             }
 
-            // Kiểm tra xem hội viên này đã đăng ký sự kiện này chưa
+            // 4. Kiểm tra đã đăng ký trước đó chưa
             bool daDangKy = _context.DangKySuKiens.Any(d => d.MaSuKien == id && d.MaNguoiDung == maNguoiDung);
             if (daDangKy)
             {
-                TempData["ErrorMessage"] = "Bạn đã đăng ký tham gia sự kiện này trước đó rồi!";
-                return RedirectToAction("ChiTiet", new { id });
+                return IsAjaxRequest()
+                    ? Json(new { success = false, message = "Bạn đã đăng ký tham gia sự kiện này trước đó rồi!" })
+                    : RedirectWithError(nameof(ChiTiet), id, "Bạn đã đăng ký tham gia sự kiện này trước đó rồi!");
             }
 
-            // Thêm bản ghi đăng ký mới vào CSDL -> SỐ LƯỢNG TỰ ĐỘNG TĂNG!
+            // 5. Thêm bản ghi đăng ký mới vào CSDL
             var dangKyMoi = new DangKySuKien
             {
                 MaSuKien = id,
@@ -139,135 +144,134 @@ namespace WNC15.Controllers
                 NgayDangKy = DateTime.Now,
                 TrangThai = "da_dang_ky"
             };
-
             _context.DangKySuKiens.Add(dangKyMoi);
             _context.SaveChanges();
 
+            int tongDaDangKy = _context.DangKySuKiens.Count(d => d.MaSuKien == id);
+            int conLai = Math.Max(0, suKien.SoLuongToiDa - tongDaDangKy);
+
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Đăng ký giữ chỗ thành công! Bạn đã có tên trong danh sách điểm danh.",
+                    isRegistered = true,
+                    soLuongDaDangKy = tongDaDangKy,
+                    soChoConLai = conLai,
+                    soLuongToiDa = suKien.SoLuongToiDa
+                });
+            }
+
             TempData["SuccessMessage"] = "Đăng ký giữ chỗ thành công! Bạn đã có tên trong danh sách điểm danh.";
-            return RedirectToAction("ChiTiet", new { id });
+            return RedirectToAction(nameof(ChiTiet), new { id });
         }
 
-        // 4. Hội viên bấm nút "Hủy đăng ký" (POST: /Event/HuyDangKy)
+        /// <summary>
+        /// Hội viên bấm nút "Hủy đăng ký": Hủy chỗ và hoàn lại số lượng chỗ trống vào CSDL.
+        /// POST: /Event/HuyDangKy (Hỗ trợ AJAX & Form)
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult HuyDangKy(int id)
         {
-            int maNguoiDung = 0;
-            if (User.Identity != null && User.Identity.IsAuthenticated)
+            var suKien = _context.SuKiens.Find(id);
+            int maNguoiDung = LayMaNguoiDungHienTai();
+
+            if (maNguoiDung == 0)
             {
-                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (idClaim != null)
+                if (IsAjaxRequest())
                 {
-                    int.TryParse(idClaim.Value, out maNguoiDung);
+                    return Json(new { success = false, message = "Vui lòng đăng nhập tài khoản để thực hiện thao tác này!" });
                 }
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập tài khoản để thực hiện thao tác này!";
+                return RedirectToAction("DangNhap", "Auth", new { returnUrl = Url.Action(nameof(ChiTiet), new { id }) });
             }
 
-            // Tìm bản đăng ký cần hủy
-            var query = _context.DangKySuKiens.Where(d => d.MaSuKien == id);
-            if (maNguoiDung > 0)
+            var dangKy = _context.DangKySuKiens.FirstOrDefault(d => d.MaSuKien == id && d.MaNguoiDung == maNguoiDung);
+            if (dangKy == null)
             {
-                query = query.Where(d => d.MaNguoiDung == maNguoiDung);
-            }
-            var dangKy = query.FirstOrDefault();
-
-            if (dangKy != null)
-            {
-                _context.DangKySuKiens.Remove(dangKy);
-                _context.SaveChanges();
-                TempData["SuccessMessage"] = "Đã hủy đăng ký thành công. Số lượng chỗ trống đã được hoàn lại.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Bạn chưa đăng ký tham gia sự kiện này.";
+                return IsAjaxRequest()
+                    ? Json(new { success = false, message = "Bạn chưa đăng ký tham gia sự kiện này." })
+                    : RedirectWithError(nameof(ChiTiet), id, "Bạn chưa đăng ký tham gia sự kiện này.");
             }
 
-            return RedirectToAction("ChiTiet", new { id });
+            _context.DangKySuKiens.Remove(dangKy);
+            _context.SaveChanges();
+
+            int tongDaDangKy = _context.DangKySuKiens.Count(d => d.MaSuKien == id);
+            int soToiDa = suKien?.SoLuongToiDa ?? 100;
+            int conLai = Math.Max(0, soToiDa - tongDaDangKy);
+
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Đã hủy đăng ký thành công. Số lượng chỗ trống đã được hoàn lại.",
+                    isRegistered = false,
+                    soLuongDaDangKy = tongDaDangKy,
+                    soChoConLai = conLai,
+                    soLuongToiDa = soToiDa
+                });
+            }
+
+            TempData["SuccessMessage"] = "Đã hủy đăng ký thành công. Số lượng chỗ trống đã được hoàn lại.";
+            return RedirectToAction(nameof(ChiTiet), new { id });
         }
 
-        // 5. Mở form thêm sự kiện mới (GET: /Event/ThemSuKien)
+        #endregion
+
+        #region 3. CHỨC NĂNG QUẢN LÝ SỰ KIỆN CHO QUẢN TRỊ VIÊN
+
+        /// <summary>
+        /// Mở form tạo sự kiện mới (chỉ Admin).
+        /// GET: /Event/ThemSuKien
+        /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult ThemSuKien()
         {
             return View();
         }
 
-        // 6. Xử lý lưu sự kiện mới (POST: /Event/ThemSuKien)
+        /// <summary>
+        /// Lưu thông tin sự kiện mới vào CSDL.
+        /// POST: /Event/ThemSuKien
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult ThemSuKien(string title, string location, int maxParticipants,
-                                        string startDate, string endDate, string deadlineDate,
-                                        string description)
+                                        string startDate, string deadlineDate, string description)
         {
-            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(location))
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(location))
             {
                 ViewBag.ErrorMessage = "Vui lòng nhập đầy đủ tên sự kiện và địa điểm tổ chức!";
                 return View();
             }
 
-            int soLuong = 100;
-            if (maxParticipants > 0)
+            DateTime ngayToChuc = DateTime.TryParse(startDate, out var dtBatDau) ? dtBatDau : DateTime.Now.AddDays(7);
+            DateTime hanDangKy = DateTime.TryParse(deadlineDate, out var dtHan) ? dtHan : ngayToChuc.AddDays(-1);
+
+            int maNguoiTao = LayMaNguoiDungHienTai();
+            if (maNguoiTao == 0 || _context.NguoiDungs.Find(maNguoiTao) == null)
             {
-                soLuong = maxParticipants;
+                var nguoiDau = _context.NguoiDungs.FirstOrDefault();
+                maNguoiTao = nguoiDau != null ? nguoiDau.MaNguoiDung : 1;
             }
 
-            DateTime ngayToChuc = DateTime.Now.AddDays(7);
-            if (!string.IsNullOrEmpty(startDate))
+            var suKienMoi = new SuKien
             {
-                DateTime dtBatDau;
-                if (DateTime.TryParse(startDate, out dtBatDau))
-                {
-                    ngayToChuc = dtBatDau;
-                }
-            }
-
-            DateTime hanDangKy = ngayToChuc.AddDays(-1);
-            if (!string.IsNullOrEmpty(deadlineDate))
-            {
-                DateTime dtHan;
-                if (DateTime.TryParse(deadlineDate, out dtHan))
-                {
-                    hanDangKy = dtHan;
-                }
-            }
-
-            // Xác định người tạo sự kiện (admin đang đăng nhập)
-            int maNguoiTao = 1;
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (idClaim != null)
-                {
-                    int parseId = 0;
-                    if (int.TryParse(idClaim.Value, out parseId))
-                    {
-                        if (parseId > 0)
-                        {
-                            maNguoiTao = parseId;
-                        }
-                    }
-                }
-            }
-
-            // Kiểm tra người tạo có tồn tại trong CSDL để tránh lỗi khóa ngoại FK
-            var nguoiTao = _context.NguoiDungs.Find(maNguoiTao);
-            if (nguoiTao == null)
-            {
-                var nguoiDauTien = _context.NguoiDungs.FirstOrDefault();
-                if (nguoiDauTien != null)
-                {
-                    maNguoiTao = nguoiDauTien.MaNguoiDung;
-                }
-            }
-
-            var suKienMoi = new SuKien();
-            suKienMoi.TenSuKien = title;
-            suKienMoi.DiaDiem = location;
-            suKienMoi.SoLuongToiDa = soLuong;
-            suKienMoi.ThoiGianToChuc = ngayToChuc;
-            suKienMoi.HanDangKy = hanDangKy;
-            suKienMoi.MoTa = description;
-            suKienMoi.MaNguoiTao = maNguoiTao;
-            suKienMoi.NgayTao = DateTime.Now;
+                TenSuKien = title.Trim(),
+                DiaDiem = location.Trim(),
+                SoLuongToiDa = maxParticipants > 0 ? maxParticipants : 100,
+                ThoiGianToChuc = ngayToChuc,
+                HanDangKy = hanDangKy,
+                MoTa = description,
+                MaNguoiTao = maNguoiTao,
+                NgayTao = DateTime.Now
+            };
 
             try
             {
@@ -275,7 +279,7 @@ namespace WNC15.Controllers
                 _context.SaveChanges();
 
                 TempData["SuccessMessage"] = "Tạo và phát hành sự kiện mới thành công!";
-                return RedirectToAction("DanhSachSuKien");
+                return RedirectToAction(nameof(DanhSachSuKien));
             }
             catch (Exception ex)
             {
@@ -284,40 +288,38 @@ namespace WNC15.Controllers
             }
         }
 
-        // 7. Xem Danh sách Điểm danh TỰ ĐỘNG TĂNG theo CSDL (GET: /Event/DanhSachDiemDanh/5)
+        /// <summary>
+        /// Xem danh sách hội viên đã đăng ký tham gia sự kiện (Danh sách điểm danh).
+        /// GET: /Event/DanhSachDiemDanh/5
+        /// </summary>
         public IActionResult DanhSachDiemDanh(int id)
         {
-            // Lấy danh sách đăng ký thực tế từ CSDL kèm thông tin hội viên
             var danhSach = _context.DangKySuKiens
-                                  .Include(d => d.NguoiDung)
-                                  .Include(d => d.SuKien)
-                                  .Where(d => d.MaSuKien == id)
-                                  .OrderByDescending(d => d.NgayDangKy)
-                                  .ToList();
+                                   .Include(d => d.NguoiDung)
+                                   .Include(d => d.SuKien)
+                                   .Where(d => d.MaSuKien == id)
+                                   .OrderByDescending(d => d.NgayDangKy)
+                                   .ToList();
 
             var suKien = _context.SuKiens.Find(id);
-            if (suKien != null)
-            {
-                ViewBag.TenSuKien = suKien.TenSuKien;
-            }
-            else
-            {
-                ViewBag.TenSuKien = "Hội thảo Khoa học Quốc tế";
-            }
+            ViewBag.TenSuKien = suKien != null ? suKien.TenSuKien : "Hội thảo Khoa học";
             ViewBag.MaSuKien = id;
 
-            return View(danhSach); // Bắn danh sách thật sang View
+            return View(danhSach);
         }
 
-        // 8. Xóa sự kiện (POST: /Event/XoaSuKien)
+        /// <summary>
+        /// Xóa sự kiện và các lượt đăng ký liên quan (chỉ Admin).
+        /// POST: /Event/XoaSuKien
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult XoaSuKien(int id)
         {
             var suKien = _context.SuKiens.Find(id);
             if (suKien != null)
             {
-                // Xóa các lượt đăng ký liên quan trước
                 var dsDangKy = _context.DangKySuKiens.Where(d => d.MaSuKien == id).ToList();
                 if (dsDangKy.Count > 0)
                 {
@@ -329,7 +331,39 @@ namespace WNC15.Controllers
 
                 TempData["SuccessMessage"] = "Đã xóa sự kiện thành công!";
             }
-            return RedirectToAction("DanhSachSuKien");
+
+            return RedirectToAction(nameof(DanhSachSuKien));
         }
+
+        #endregion
+
+        #region 4. PHƯƠNG THỨC TIỆN ÍCH DÙNG CHUNG
+
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers["X-Requested-With"] == "XMLHttpRequest"
+                || Request.Headers.Accept.ToString().Contains("application/json");
+        }
+
+        private int LayMaNguoiDungHienTai()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (idClaim != null && int.TryParse(idClaim.Value, out int id))
+                {
+                    return id;
+                }
+            }
+            return 0;
+        }
+
+        private IActionResult RedirectWithError(string actionName, int id, string message)
+        {
+            TempData["ErrorMessage"] = message;
+            return RedirectToAction(actionName, new { id });
+        }
+
+        #endregion
     }
 }

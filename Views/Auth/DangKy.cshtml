@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Đơn đăng ký gia nhập Hiệp hội";
 }
 
@@ -118,3 +118,28 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Tự động đồng bộ Tên đăng nhập và Tiền tố Email giúp đăng nhập bằng cả 2 cách
+        document.addEventListener("DOMContentLoaded", function () {
+            var usernameInput = document.querySelector('input[name="username"]');
+            var emailInput = document.querySelector('input[name="email"]');
+
+            if (usernameInput && emailInput) {
+                usernameInput.addEventListener("input", function () {
+                    var val = usernameInput.value.trim().toLowerCase().replace(/[^a-z0-9._]/g, '');
+                    usernameInput.value = val;
+                    if (!emailInput.value || emailInput.dataset.autoFilled === "true") {
+                        emailInput.value = val ? (val + "@@gmail.com") : "";
+                        emailInput.dataset.autoFilled = "true";
+                    }
+                });
+
+                emailInput.addEventListener("input", function () {
+                    emailInput.dataset.autoFilled = "false";
+                });
+            }
+        });
+    </script>
+}

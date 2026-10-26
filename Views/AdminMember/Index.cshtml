@@ -1,0 +1,496 @@
+@model IEnumerable<WNC15.Models.BaiViet>
+@{
+    ViewData["Title"] = "Bảng Điều Khiển Quản Trị (Admin Dashboard)";
+    var dsChoDuyet = ViewBag.DsChoDuyet as IEnumerable<WNC15.Models.NguoiDung> ?? new List<WNC15.Models.NguoiDung>();
+    int tongHoiVien = ViewBag.TongHoiVien ?? 0;
+    int soHoSoChoDuyet = ViewBag.SoHoSoChoDuyet ?? 0;
+    int tongBaiViet = ViewBag.TongBaiViet ?? 0;
+    int tongSuKien = ViewBag.TongSuKien ?? 0;
+    int tongLuotDangKy = ViewBag.TongLuotDangKy ?? 0;
+}
+
+<div class="py-3">
+    <!-- Header Dashboard -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <span class="badge bg-primary px-3 py-1 mb-1">
+                <i class="bi bi-shield-lock-fill me-1"></i>Hệ thống Quản Trị Viên
+            </span>
+            <h2 class="fw-bold text-dark mb-1">Bảng Điều Khiển Quản Trị (Admin Dashboard)</h2>
+            <p class="text-muted small mb-0">Trung tâm quản lý hội viên, kiểm duyệt bài viết và điều hành các hoạt động Hiệp hội</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Đăng bài viết mới
+            </a>
+            <a asp-controller="Event" asp-action="ThemSuKien" class="btn btn-outline-primary fw-semibold">
+                <i class="bi bi-calendar-plus me-1"></i> Tạo sự kiện mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo AJAX -->
+    <div id="dashboardAlert"></div>
+
+    <!-- 4 THẺ THỐNG KÊ KPI NỔI BẬT -->
+    <div class="row g-3 mb-4">
+        <!-- Thẻ 1: Hội viên chính thức -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold">Hội viên chính thức</span>
+                    <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3">
+                        <i class="bi bi-people-fill fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-2">@tongHoiVien</h3>
+                <a asp-controller="AdminMember" asp-action="DanhSachHoiVien" class="text-decoration-none small text-primary fw-semibold">
+                    Quản lý danh sách <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Thẻ 2: Hồ sơ đang chờ duyệt -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white border-start border-warning border-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold">Hồ sơ chờ phê duyệt</span>
+                    <div class="bg-warning bg-opacity-25 text-warning-emphasis p-2 rounded-3">
+                        <i class="bi bi-hourglass-split fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-warning-emphasis mb-2" id="kpiChoDuyet">@soHoSoChoDuyet</h3>
+                <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="text-decoration-none small text-warning-emphasis fw-semibold">
+                    Xem hồ sơ cần duyệt <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Thẻ 3: Bài viết & Tin tức -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold">Bài viết & Tin tức</span>
+                    <div class="bg-success bg-opacity-10 text-success p-2 rounded-3">
+                        <i class="bi bi-newspaper fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-2" id="kpiBaiViet">@tongBaiViet</h3>
+                <span class="small text-muted">
+                    <i class="bi bi-shield-check text-success me-1"></i>Chỉ Admin có quyền đăng
+                </span>
+            </div>
+        </div>
+
+        <!-- Thẻ 4: Sự kiện & Lượt đăng ký -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold">Sự kiện & Hội thảo</span>
+                    <div class="bg-info bg-opacity-10 text-info p-2 rounded-3">
+                        <i class="bi bi-calendar-event-fill fs-4"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-2">@tongSuKien</h3>
+                <a asp-controller="Event" asp-action="DanhSachSuKien" class="text-decoration-none small text-info fw-semibold">
+                    @tongLuotDangKy lượt hội viên đăng ký <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHU VỰC 1: KIỂM DUYỆT & QUẢN LÝ BÀI VIẾT (TIN TỨC) -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-1 text-dark">
+                    <i class="bi bi-newspaper text-primary me-2"></i>Quản Lý & Kiểm Duyệt Bài Viết
+                </h5>
+                <small class="text-muted">Thêm, Sửa, Xóa, Duyệt bài viết và Tìm kiếm theo chuyên mục</small>
+            </div>
+            <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-sm btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Đăng bài viết mới
+            </a>
+        </div>
+
+        <!-- Thanh Tìm kiếm và Lọc bài viết theo danh mục -->
+        <div class="bg-light border-bottom p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchPostInput" class="form-control" placeholder="Tìm kiếm theo tiêu đề, tác giả hoặc tóm tắt..." />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filterCategorySelect" class="form-select form-select-sm">
+                        <option value="">-- Tất cả chuyên mục --</option>
+                        <option value="Nghiên cứu & Công nghệ">Nghiên cứu & Công nghệ</option>
+                        <option value="Thông báo Hiệp hội">Thông báo Hiệp hội</option>
+                        <option value="Sinh hoạt Hội viên">Sinh hoạt Hội viên</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-md-end">
+                    <span class="badge bg-secondary-subtle text-secondary" id="postCountBadge">Tổng số: @(Model?.Count() ?? 0) bài</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small">
+                    <tr>
+                        <th class="ps-4">Tiêu Đề Bài Viết</th>
+                        <th>Chuyên Mục</th>
+                        <th>Tác Giả</th>
+                        <th>Thời Gian Đăng</th>
+                        <th>Lượt Xem</th>
+                        <th class="text-center">Trạng Thái</th>
+                        <th class="text-center pe-4" style="min-width: 240px;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="small" id="tbodyBaiViet">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var post in Model)
+                        {
+                            var tenDm = post.DanhMuc != null ? post.DanhMuc.TenDanhMuc : "Tin tức chung";
+                            var tenTg = post.TacGia != null ? post.TacGia.HoTen : "Ban Quản Trị";
+                            <tr id="row-post-@post.MaBaiViet"
+                                class="post-item-row"
+                                data-title="@(post.TieuDe?.ToLower() ?? "")"
+                                data-category="@tenDm.ToLower()"
+                                data-author="@tenTg.ToLower()"
+                                data-summary="@(post.TomTat?.ToLower() ?? "")">
+                                <td class="ps-4" style="max-width: 320px;">
+                                    <strong class="text-dark d-block text-truncate" title="@post.TieuDe">@post.TieuDe</strong>
+                                    <span class="text-muted small text-truncate d-block">@(string.IsNullOrEmpty(post.TomTat) ? "Không có tóm tắt" : post.TomTat)</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @tenDm
+                                    </span>
+                                </td>
+                                <td>@(post.TacGia != null ? post.TacGia.HoTen : "Ban Quản Trị")</td>
+                                <td>@post.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td><span class="badge bg-secondary-subtle text-secondary">@post.LuotXem</span></td>
+                                <td class="text-center" id="status-cell-@post.MaBaiViet">
+                                    @if (post.TrangThai == "da_dang")
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-2 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Đã xuất bản
+                                        </span>
+                                    }
+                                    else if (post.TrangThai == "an")
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                            <i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1">
+                                            <i class="bi bi-clock-fill me-1"></i>Chờ duyệt
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-1" id="action-cell-@post.MaBaiViet">
+                                        <!-- Nút Xem trước bài viết -->
+                                        <a asp-controller="Post" asp-action="ChiTiet" asp-route-id="@post.MaBaiViet" class="btn btn-outline-info btn-sm px-2" target="_blank" title="Xem trước bài viết">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+
+                                        <!-- Nút SỬA BÀI VIẾT (Admin) -->
+                                        <a asp-controller="Post" asp-action="SuaTinTuc" asp-route-id="@post.MaBaiViet" class="btn btn-outline-primary btn-sm px-2" title="Chỉnh sửa bài viết này">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- Nút Duyệt xuất bản hoặc Ẩn bài viết -->
+                                        @if (post.TrangThai == "da_dang")
+                                        {
+                                            <form asp-controller="AdminMember" asp-action="AnBaiViet" method="post" class="d-inline form-toggle-post-ajax">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@post.MaBaiViet" />
+                                                <button type="submit" class="btn btn-outline-warning btn-sm px-2" title="Ẩn bài viết khỏi trang chủ">
+                                                    <i class="bi bi-eye-slash me-1"></i> Ẩn
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="AdminMember" asp-action="DuyetBaiViet" method="post" class="d-inline form-toggle-post-ajax">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@post.MaBaiViet" />
+                                                <button type="submit" class="btn btn-success btn-sm px-2 shadow-sm" title="Duyệt và xuất bản ngay">
+                                                    <i class="bi bi-check-lg me-1"></i> Duyệt
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <!-- Nút Xóa bài viết -->
+                                        <form asp-controller="AdminMember" asp-action="XoaBaiViet" method="post" class="d-inline form-delete-post-ajax">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@post.MaBaiViet" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm px-2" onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');" title="Xóa bài viết">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có bài viết nào trong hệ thống.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- KHU VỰC 2: HỒ SƠ HỘI VIÊN CHỜ DUYỆT GẦN NHẤT -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-1 text-dark">
+                    <i class="bi bi-person-check text-warning me-2"></i>Hồ Sơ Hội Viên Đang Chờ Phê Duyệt
+                </h5>
+                <small class="text-muted">Các đơn đăng ký mới nhất cần ban quản trị xét duyệt kết nạp</small>
+            </div>
+            <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-outline-warning btn-sm fw-semibold text-dark">
+                Xem toàn bộ (@soHoSoChoDuyet hồ sơ) <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small">
+                    <tr>
+                        <th class="ps-4">Ứng Viên</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Đơn Vị Công Tác</th>
+                        <th>Chức Danh & Lĩnh Vực</th>
+                        <th>Thời Gian Nộp</th>
+                        <th class="text-center pe-4" style="min-width: 180px;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="small" id="tbodyQuickHoSo">
+                    @if (dsChoDuyet.Any())
+                    {
+                        foreach (var m in dsChoDuyet)
+                        {
+                            <tr id="row-quick-member-@m.MaNguoiDung">
+                                <td class="ps-4">
+                                    <strong class="text-dark d-block">@m.HoTen</strong>
+                                    <span class="text-muted small">@m.Email</span>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(m.SoDienThoai) ? "---" : m.SoDienThoai)</td>
+                                <td>@(string.IsNullOrEmpty(m.DonViCongTac) ? "---" : m.DonViCongTac)</td>
+                                <td>
+                                    <div><strong>@(string.IsNullOrEmpty(m.ChucDanh) ? "Chưa cập nhật" : m.ChucDanh)</strong></div>
+                                    <small class="text-muted">@(string.IsNullOrEmpty(m.LinhVuc) ? "Chưa cập nhật" : m.LinhVuc)</small>
+                                </td>
+                                <td>@m.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-center pe-4">
+                                    <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline form-quick-phe-duyet-ajax">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@m.MaNguoiDung" />
+                                        <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm">
+                                            <i class="bi bi-check-lg me-1"></i> Phê duyệt
+                                        </button>
+                                    </form>
+                                    <a asp-controller="AdminMember" asp-action="HoSoChoDuyet" class="btn btn-outline-secondary btn-sm px-2">
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-check2-circle text-success fs-3 d-block mb-1"></i>
+                                Tuyệt vời! Hiện tại không có hồ sơ nào đang chờ duyệt.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Hàm hiển thị thông báo Alert động
+            function hienThiThongBao(thanhCong, noiDung) {
+                var loaiAlert = thanhCong ? 'alert-success' : 'alert-danger';
+                var iconAlert = thanhCong ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+                var htmlAlert = `
+                    <div class="alert ${loaiAlert} alert-dismissible fade show shadow-sm d-flex align-items-center mb-3" role="alert">
+                        <i class="bi ${iconAlert} fs-5 me-2"></i>
+                        <div>${noiDung}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+
+                $('#dashboardAlert').html(htmlAlert);
+                setTimeout(function () {
+                    $('#dashboardAlert .alert').alert('close');
+                }, 4000);
+            }
+
+            // 1. AJAX: Duyệt xuất bản / Ẩn bài viết
+            $(document).on('submit', '.form-toggle-post-ajax', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                var btn = form.find('button[type="submit"]');
+                var originalHtml = btn.html();
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.success) {
+                            var postId = res.id;
+                            var token = form.find('input[name="__RequestVerificationToken"]').val();
+
+                            if (res.trangThai === "da_dang") {
+                                // Cập nhật badge
+                                $('#status-cell-' + postId).html(`
+                                    <span class="badge bg-success-subtle text-success px-2 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Đã xuất bản
+                                    </span>`);
+
+                                // Cập nhật nút bấm thành nút Ẩn
+                                form.attr('action', '/AdminMember/AnBaiViet');
+                                btn.prop('disabled', false).removeClass('btn-success shadow-sm').addClass('btn-outline-warning').html('<i class="bi bi-eye-slash me-1"></i> Ẩn');
+                            } else {
+                                // Cập nhật badge
+                                $('#status-cell-' + postId).html(`
+                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                        <i class="bi bi-eye-slash-fill me-1"></i>Đang ẩn
+                                    </span>`);
+
+                                // Cập nhật nút bấm thành nút Duyệt
+                                form.attr('action', '/AdminMember/DuyetBaiViet');
+                                btn.prop('disabled', false).removeClass('btn-outline-warning').addClass('btn-success shadow-sm').html('<i class="bi bi-check-lg me-1"></i> Duyệt');
+                            }
+
+                            hienThiThongBao(true, res.message);
+                        } else {
+                            btn.prop('disabled', false).html(originalHtml);
+                            hienThiThongBao(false, res.message);
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false).html(originalHtml);
+                        hienThiThongBao(false, 'Lỗi kết nối máy chủ!');
+                    }
+                });
+            });
+
+            // 2. AJAX: Xóa bài viết
+            $(document).on('submit', '.form-delete-post-ajax', function (e) {
+                e.preventDefault();
+                var form = $(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.success) {
+                            $('#row-post-' + res.id).fadeOut(400, function () {
+                                $(this).remove();
+                                var curKpi = parseInt($('#kpiBaiViet').text()) || 0;
+                                if (curKpi > 0) $('#kpiBaiViet').text(curKpi - 1);
+                                locBaiViet();
+                            });
+                            hienThiThongBao(true, res.message);
+                        } else {
+                            hienThiThongBao(false, res.message);
+                        }
+                    },
+                    error: function () {
+                        hienThiThongBao(false, 'Lỗi kết nối máy chủ!');
+                    }
+                });
+            });
+
+            // 3. AJAX: Phê duyệt nhanh hồ sơ hội viên tại Dashboard
+            $(document).on('submit', '.form-quick-phe-duyet-ajax', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                var btn = form.find('button[type="submit"]');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.success) {
+                            $('#row-quick-member-' + res.id).fadeOut(400, function () {
+                                $(this).remove();
+                                $('#kpiChoDuyet').text(res.soHoSoChoDuyet);
+                            });
+                            hienThiThongBao(true, res.message);
+                        } else {
+                            btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Phê duyệt');
+                            hienThiThongBao(false, res.message);
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Phê duyệt');
+                        hienThiThongBao(false, 'Lỗi kết nối máy chủ!');
+                    }
+                });
+            });
+
+            // 4. Lọc và Tìm kiếm bài viết theo từ khóa và chuyên mục
+            function locBaiViet() {
+                var keyword = ($('#searchPostInput').val() || '').toLowerCase().trim();
+                var category = ($('#filterCategorySelect').val() || '').toLowerCase().trim();
+                var count = 0;
+
+                $('.post-item-row').each(function () {
+                    var row = $(this);
+                    var title = row.attr('data-title') || '';
+                    var summary = row.attr('data-summary') || '';
+                    var author = row.attr('data-author') || '';
+                    var cat = row.attr('data-category') || '';
+
+                    var matchKeyword = !keyword || title.indexOf(keyword) !== -1 || summary.indexOf(keyword) !== -1 || author.indexOf(keyword) !== -1;
+                    var matchCategory = !category || cat.indexOf(category) !== -1;
+
+                    if (matchKeyword && matchCategory) {
+                        row.show();
+                        count++;
+                    } else {
+                        row.hide();
+                    }
+                });
+
+                $('#postCountBadge').text('Hiển thị: ' + count + ' bài');
+            }
+
+            $('#searchPostInput').on('input keyup', locBaiViet);
+            $('#filterCategorySelect').on('change', locBaiViet);
+        });
+    </script>
+}

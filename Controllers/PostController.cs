@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WNC15.Data;
@@ -6,27 +7,42 @@ using WNC15.Models;
 
 namespace WNC15.Controllers
 {
-    // Controller quản lý Tin tức và Bài viết
+    /// <summary>
+    /// Controller quản lý Tin tức & Bài viết:
+    /// - Hiển thị danh sách tin tức công khai (kèm bộ lọc theo chuyên mục và tìm kiếm từ khóa).
+    /// - Xem chi tiết bài viết (tự động đếm lượt xem).
+    /// - Dành cho Quản trị viên: Đăng bài viết mới, Chỉnh sửa, Xóa bài viết.
+    /// </summary>
     public class PostController : Controller
     {
-        // Biến lưu ngữ cảnh CSDL, không dùng readonly
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public PostController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // 1. Danh sách tin tức (GET: /Post/DanhSachTinTuc)
+        #region 1. XEM DANH SÁCH & CHI TIẾT BÀI VIẾT
+
+        /// <summary>
+        /// Danh sách bài viết & tin tức (Khách và hội viên chỉ xem được bài 'da_dang', Admin xem được tất cả).
+        /// GET: /Post/DanhSachTinTuc
+        /// </summary>
         public IActionResult DanhSachTinTuc(string search, int categoryId)
         {
-            // Đảm bảo có ít nhất 1 danh mục và 1 bài viết mẫu trong CSDL
             KiemTraVaKhoiTaoDuLieuMau();
 
             var query = _context.BaiViets
                                 .Include(b => b.DanhMuc)
                                 .Include(b => b.TacGia)
                                 .AsQueryable();
+
+            // Khách vãng lai và hội viên thường chỉ xem bài đã xuất bản
+            bool isAdmin = User.Identity != null && (User.IsInRole("Admin") || User.IsInRole("quan_tri"));
+            if (!isAdmin)
+            {
+                query = query.Where(b => b.TrangThai == "da_dang");
+            }
 
             // Lọc theo từ khóa tìm kiếm
             if (!string.IsNullOrWhiteSpace(search))
@@ -47,10 +63,13 @@ namespace WNC15.Controllers
             ViewBag.Search = search;
             ViewBag.CategoryId = categoryId;
 
-            return View(danhSach); // Bắn danh sách thật sang View
+            return View(danhSach);
         }
 
-        // 2. Chi tiết một bài viết (GET: /Post/ChiTiet/5)
+        /// <summary>
+        /// Xem nội dung chi tiết bài viết và tự động tăng số lượt xem.
+        /// GET: /Post/ChiTiet/5
+        /// </summary>
         public IActionResult ChiTiet(int id)
         {
             KiemTraVaKhoiTaoDuLieuMau();
@@ -70,73 +89,63 @@ namespace WNC15.Controllers
 
             if (baiViet != null)
             {
-                // Tăng số lượt xem bài viết
-                baiViet.LuotXem = baiViet.LuotXem + 1;
+                baiViet.LuotXem++;
                 _context.SaveChanges();
             }
 
             return View(baiViet);
         }
 
-        // 3. Mở form đăng bài viết mới (GET: /Post/ThemTinTuc)
+        #endregion
+
+        #region 2. QUẢN TRỊ VIÊN: ĐĂNG, SỬA & XÓA BÀI VIẾT
+
+        /// <summary>
+        /// Mở form soạn thảo bài viết mới (chỉ Admin).
+        /// GET: /Post/ThemTinTuc
+        /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult ThemTinTuc()
         {
-            return View(); // Trả về Views/Post/ThemTinTuc.cshtml
+            return View();
         }
 
-        // 4. Xử lý lưu bài viết mới (POST: /Post/ThemTinTuc)
+        /// <summary>
+        /// Lưu bài viết mới vào CSDL (chỉ Admin).
+        /// POST: /Post/ThemTinTuc
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult ThemTinTuc(string title, int categoryId, string summary, string content)
         {
-            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(content))
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
             {
                 ModelState.AddModelError("", "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết!");
                 return View();
             }
 
             // Xác định tác giả đăng bài
-            int maTacGia = 1;
-            if (User.Identity != null && User.Identity.IsAuthenticated)
+            int maTacGia = LayMaNguoiDungHienTai();
+            if (maTacGia == 0 || _context.NguoiDungs.Find(maTacGia) == null)
             {
-                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (idClaim != null)
-                {
-                    int.TryParse(idClaim.Value, out maTacGia);
-                }
+                var nguoiDau = _context.NguoiDungs.FirstOrDefault();
+                maTacGia = nguoiDau != null ? nguoiDau.MaNguoiDung : 1;
             }
 
-            // Đảm bảo tác giả tồn tại trong CSDL
-            var tacGia = _context.NguoiDungs.Find(maTacGia);
-            if (tacGia == null)
-            {
-                var nguoiDungDau = _context.NguoiDungs.FirstOrDefault();
-                if (nguoiDungDau != null)
-                {
-                    maTacGia = nguoiDungDau.MaNguoiDung;
-                }
-            }
-
-            // Đảm bảo có danh mục hợp lệ
+            // Xác định danh mục hợp lệ
             if (categoryId <= 0)
             {
-                var danhMucDau = _context.DanhMucs.FirstOrDefault();
-                if (danhMucDau != null)
-                {
-                    categoryId = danhMucDau.MaDanhMuc;
-                }
-                else
-                {
-                    categoryId = 1;
-                }
+                var dmDau = _context.DanhMucs.FirstOrDefault();
+                categoryId = dmDau != null ? dmDau.MaDanhMuc : 1;
             }
 
             var baiVietMoi = new BaiViet
             {
-                TieuDe = title,
+                TieuDe = title.Trim(),
                 MaDanhMuc = categoryId,
-                TomTat = summary,
+                TomTat = summary?.Trim(),
                 NoiDung = content,
                 MaTacGia = maTacGia,
                 TrangThai = "da_dang",
@@ -148,12 +157,70 @@ namespace WNC15.Controllers
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Đăng bài viết mới thành công!";
-            return RedirectToAction("DanhSachTinTuc");
+            return RedirectToAction(nameof(DanhSachTinTuc));
         }
 
-        // 5. Xóa bài viết (POST: /Post/XoaTinTuc)
+        /// <summary>
+        /// Mở form chỉnh sửa bài viết đã có (chỉ Admin).
+        /// GET: /Post/SuaTinTuc/5
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = "Admin,quan_tri")]
+        public IActionResult SuaTinTuc(int id)
+        {
+            var baiViet = _context.BaiViets.Include(b => b.DanhMuc).FirstOrDefault(b => b.MaBaiViet == id);
+            if (baiViet == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài viết cần chỉnh sửa!";
+                return RedirectToAction(nameof(DanhSachTinTuc));
+            }
+            return View(baiViet);
+        }
+
+        /// <summary>
+        /// Lưu các thay đổi của bài viết vào CSDL (chỉ Admin).
+        /// POST: /Post/SuaTinTuc
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,quan_tri")]
+        public IActionResult SuaTinTuc(int id, string title, int categoryId, string summary, string content, string status)
+        {
+            var baiViet = _context.BaiViets.Find(id);
+            if (baiViet == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài viết cần cập nhật!";
+                return RedirectToAction(nameof(DanhSachTinTuc));
+            }
+
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
+            {
+                ModelState.AddModelError("", "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết!");
+                return View(baiViet);
+            }
+
+            baiViet.TieuDe = title.Trim();
+            baiViet.MaDanhMuc = categoryId > 0 ? categoryId : 1;
+            baiViet.TomTat = summary?.Trim();
+            baiViet.NoiDung = content;
+            if (!string.IsNullOrEmpty(status))
+            {
+                baiViet.TrangThai = status;
+            }
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Cập nhật bài viết thành công!";
+            return RedirectToAction(nameof(ChiTiet), new { id });
+        }
+
+        /// <summary>
+        /// Xóa bài viết khỏi CSDL (chỉ Admin).
+        /// POST: /Post/XoaTinTuc
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult XoaTinTuc(int id)
         {
             var baiViet = _context.BaiViets.Find(id);
@@ -163,10 +230,29 @@ namespace WNC15.Controllers
                 _context.SaveChanges();
                 TempData["SuccessMessage"] = "Đã xóa bài viết thành công!";
             }
-            return RedirectToAction("DanhSachTinTuc");
+            return RedirectToAction(nameof(DanhSachTinTuc));
         }
 
-        // Hàm phụ: Tự động khởi tạo danh mục và bài viết mẫu nếu CSDL hoàn toàn trống
+        #endregion
+
+        #region 3. PHƯƠNG THỨC TIỆN ÍCH DÙNG CHUNG
+
+        private int LayMaNguoiDungHienTai()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (idClaim != null && int.TryParse(idClaim.Value, out int id))
+                {
+                    return id;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Khởi tạo dữ liệu mẫu về danh mục và bài viết nếu CSDL chưa có dữ liệu.
+        /// </summary>
         private void KiemTraVaKhoiTaoDuLieuMau()
         {
             if (!_context.DanhMucs.Any())
@@ -202,8 +288,8 @@ namespace WNC15.Controllers
                     maAdmin = admin.MaNguoiDung;
                 }
 
-                var danhMucDau = _context.DanhMucs.FirstOrDefault();
-                int maDanhMuc = danhMucDau != null ? danhMucDau.MaDanhMuc : 1;
+                var dmDau = _context.DanhMucs.FirstOrDefault();
+                int maDanhMuc = dmDau != null ? dmDau.MaDanhMuc : 1;
 
                 _context.BaiViets.Add(new BaiViet
                 {
@@ -219,5 +305,7 @@ namespace WNC15.Controllers
                 _context.SaveChanges();
             }
         }
+
+        #endregion
     }
 }

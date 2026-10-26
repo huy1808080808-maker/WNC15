@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WNC15.Models.NguoiDung>
+@model IEnumerable<WNC15.Models.NguoiDung>
 @{
     ViewData["Title"] = "Xét duyệt hồ sơ gia nhập";
     var tongSo = Model?.Count() ?? 0;
@@ -19,14 +19,17 @@
         </div>
     </div>
 
+    <!-- Thông báo phản hồi nhanh AJAX -->
+    <div id="ajaxAdminAlert"></div>
+
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center">
-            <span class="badge bg-warning text-dark px-3 py-2">
-                Hồ sơ đang chờ xử lý: <strong>@tongSo hồ sơ</strong>
+            <span class="badge bg-warning text-dark px-3 py-2" id="badgeSoHoSo">
+                Hồ sơ đang chờ xử lý: <strong id="lblSoHoSo">@tongSo hồ sơ</strong>
             </span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="tableHoSoChoDuyet">
                 <thead class="table-light text-secondary small">
                     <tr>
                         <th class="ps-4">Họ và Tên / Email</th>
@@ -37,12 +40,12 @@
                         <th class="text-center pe-4" style="min-width: 200px;">Thao Tác Duyệt</th>
                     </tr>
                 </thead>
-                <tbody class="small">
+                <tbody class="small" id="tbodyHoSo">
                     @if (Model != null && Model.Any())
                     {
                         foreach (var item in Model)
                         {
-                            <tr>
+                            <tr id="row-member-@item.MaNguoiDung">
                                 <td class="ps-4">
                                     <strong class="text-dark d-block">@item.HoTen</strong>
                                     <span class="text-muted small">@item.Email</span>
@@ -56,10 +59,10 @@
                                 <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="text-center pe-4">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline">
+                                        <form asp-controller="AdminMember" asp-action="PheDuyet" method="post" class="d-inline form-phe-duyet-ajax">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@item.MaNguoiDung" />
-                                            <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" onclick="return confirm('Xác nhận phê duyệt kết nạp hội viên: @item.HoTen?');">
+                                            <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm btn-phe-duyet-ajax" data-name="@item.HoTen">
                                                 <i class="bi bi-check-lg me-1"></i> Phê duyệt
                                             </button>
                                         </form>
@@ -73,7 +76,7 @@
                     }
                     else
                     {
-                        <tr>
+                        <tr id="rowEmpty">
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 Hiện tại không có hồ sơ nào đang chờ xét duyệt.
@@ -96,7 +99,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-controller="AdminMember" asp-action="TuChoi" method="post">
+            <form id="formTuChoiAjax" asp-controller="AdminMember" asp-action="TuChoi" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <input type="hidden" id="rejectId" name="id" value="" />
@@ -111,7 +114,7 @@
                 </div>
                 <div class="modal-footer border-top">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger px-4">Xác nhận từ chối</button>
+                    <button type="submit" class="btn btn-danger px-4" id="btnConfirmTuChoi">Xác nhận từ chối</button>
                 </div>
             </form>
         </div>
@@ -124,5 +127,127 @@
             document.getElementById('rejectId').value = id;
             document.getElementById('rejectName').innerText = name;
         }
+
+        $(document).ready(function () {
+            // Hàm thông báo Alert động
+            function hienThiThongBaoAdmin(thanhCong, noiDung) {
+                var loaiAlert = thanhCong ? 'alert-success' : 'alert-danger';
+                var iconAlert = thanhCong ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+                var htmlAlert = `
+                    <div class="alert ${loaiAlert} alert-dismissible fade show shadow-sm d-flex align-items-center mb-3" role="alert">
+                        <i class="bi ${iconAlert} fs-5 me-2"></i>
+                        <div>${noiDung}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+
+                $('#ajaxAdminAlert').html(htmlAlert);
+                setTimeout(function () {
+                    $('#ajaxAdminAlert .alert').alert('close');
+                }, 4000);
+            }
+
+            // 1. Phê duyệt hồ sơ bằng AJAX
+            $(document).on('submit', '.form-phe-duyet-ajax', function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var btn = form.find('.btn-phe-duyet-ajax');
+                var tenHoiVien = btn.data('name');
+
+                if (!confirm('Xác nhận phê duyệt kết nạp hội viên: ' + tenHoiVien + '?')) {
+                    return;
+                }
+
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.success) {
+                            // Làm mờ và xóa dòng hội viên khỏi bảng
+                            $('#row-member-' + res.id).fadeOut(400, function () {
+                                $(this).remove();
+                                // Cập nhật số lượng hồ sơ
+                                $('#lblSoHoSo').text(res.soHoSoChoDuyet + ' hồ sơ');
+
+                                // Nếu đã duyệt hết hồ sơ
+                                if (res.soHoSoChoDuyet === 0) {
+                                    $('#tbodyHoSo').html(`
+                                        <tr id="rowEmpty">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                                Hiện tại không có hồ sơ nào đang chờ xét duyệt.
+                                            </td>
+                                        </tr>`);
+                                }
+                            });
+                            hienThiThongBaoAdmin(true, res.message);
+                        } else {
+                            btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Phê duyệt');
+                            hienThiThongBaoAdmin(false, res.message);
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Phê duyệt');
+                        hienThiThongBaoAdmin(false, 'Lỗi kết nối máy chủ!');
+                    }
+                });
+            });
+
+            // 2. Từ chối hồ sơ bằng AJAX
+            $('#formTuChoiAjax').on('submit', function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var btn = $('#btnConfirmTuChoi');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function (res) {
+                        // Đóng modal
+                        var modalEl = document.getElementById('modalTuChoi');
+                        var modalObj = bootstrap.Modal.getInstance(modalEl);
+                        if (modalObj) {
+                            modalObj.hide();
+                        }
+                        btn.prop('disabled', false).text('Xác nhận từ chối');
+                        form[0].reset();
+
+                        if (res.success) {
+                            $('#row-member-' + res.id).fadeOut(400, function () {
+                                $(this).remove();
+                                $('#lblSoHoSo').text(res.soHoSoChoDuyet + ' hồ sơ');
+                                if (res.soHoSoChoDuyet === 0) {
+                                    $('#tbodyHoSo').html(`
+                                        <tr id="rowEmpty">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                                Hiện tại không có hồ sơ nào đang chờ xét duyệt.
+                                            </td>
+                                        </tr>`);
+                                }
+                            });
+                            hienThiThongBaoAdmin(true, res.message);
+                        } else {
+                            hienThiThongBaoAdmin(false, res.message);
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false).text('Xác nhận từ chối');
+                        hienThiThongBaoAdmin(false, 'Lỗi kết nối máy chủ!');
+                    }
+                });
+            });
+        });
     </script>
 }

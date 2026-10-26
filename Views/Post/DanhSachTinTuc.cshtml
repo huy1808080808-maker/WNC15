@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WNC15.Models.BaiViet>
+@model IEnumerable<WNC15.Models.BaiViet>
 @{
     ViewData["Title"] = "Tin tức & Hoạt động chuyên môn";
     var tuKhoa = ViewBag.Search as string ?? "";
@@ -14,11 +14,14 @@
             </h2>
             <p class="text-muted small mb-0">Cập nhật các công trình nghiên cứu, thông báo và hoạt động học thuật mới nhất</p>
         </div>
-        <div>
-            <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-primary fw-semibold shadow-sm">
-                <i class="bi bi-pencil-square me-1"></i> Đăng bài viết mới
-            </a>
-        </div>
+        @if (User.IsInRole("Admin") || User.IsInRole("quan_tri"))
+        {
+            <div>
+                <a asp-controller="Post" asp-action="ThemTinTuc" class="btn btn-primary fw-semibold shadow-sm">
+                    <i class="bi bi-pencil-square me-1"></i> Đăng bài viết mới
+                </a>
+            </div>
+        }
     </div>
 
     <!-- Thanh tìm kiếm và bộ lọc chuyên mục -->
