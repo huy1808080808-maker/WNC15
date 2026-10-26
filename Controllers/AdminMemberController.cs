@@ -26,9 +26,9 @@ namespace WNC15.Controllers
 
         /// <summary>
         /// Trang tổng quan: Hiển thị 4 thẻ thống kê KPI, danh sách bài viết kiểm duyệt và hồ sơ mới nộp.
-        /// GET: /AdminMember hoặc /AdminMember/Index
+        /// GET: /AdminMember hoặc /AdminMember/BangQuanTri
         /// </summary>
-        public IActionResult Index()
+        public IActionResult BangQuanTri()
         {
             // 1. Thống kê số liệu hệ thống từ CSDL
             ViewBag.TongHoiVien = _context.NguoiDungs.Count(u => u.VaiTro == "hoi_vien" && u.TrangThai == "hoat_dong");
@@ -275,7 +275,7 @@ namespace WNC15.Controllers
             {
                 return IsAjaxRequest()
                     ? Json(new { success = false, message = "Không tìm thấy bài viết!" })
-                    : (IActionResult)RedirectToAction(nameof(Index));
+                    : (IActionResult)RedirectToAction(nameof(BangQuanTri));
             }
 
             baiViet.TrangThai = "da_dang";
@@ -287,7 +287,7 @@ namespace WNC15.Controllers
             }
 
             TempData["SuccessMessage"] = "Đã xuất bản bài viết thành công!";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(BangQuanTri));
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace WNC15.Controllers
             {
                 return IsAjaxRequest()
                     ? Json(new { success = false, message = "Không tìm thấy bài viết!" })
-                    : (IActionResult)RedirectToAction(nameof(Index));
+                    : (IActionResult)RedirectToAction(nameof(BangQuanTri));
             }
 
             baiViet.TrangThai = "an";
@@ -315,7 +315,7 @@ namespace WNC15.Controllers
             }
 
             TempData["SuccessMessage"] = "Đã ẩn bài viết thành công!";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(BangQuanTri));
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace WNC15.Controllers
             {
                 return IsAjaxRequest()
                     ? Json(new { success = false, message = "Không tìm thấy bài viết!" })
-                    : (IActionResult)RedirectToAction(nameof(Index));
+                    : (IActionResult)RedirectToAction(nameof(BangQuanTri));
             }
 
             _context.BaiViets.Remove(baiViet);
@@ -343,7 +343,7 @@ namespace WNC15.Controllers
             }
 
             TempData["SuccessMessage"] = "Đã xóa bài viết thành công!";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(BangQuanTri));
         }
 
         #endregion

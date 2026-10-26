@@ -47,7 +47,7 @@
                             @if (User.IsInRole("Admin") || User.IsInRole("quan_tri"))
                             {
                                 <li class="nav-item">
-                                    <a class="btn btn-warning btn-sm text-dark fw-semibold shadow-sm" asp-controller="AdminMember" asp-action="Index">
+                                    <a class="btn btn-warning btn-sm text-dark fw-semibold shadow-sm" asp-controller="AdminMember" asp-action="BangQuanTri">
                                         <i class="bi bi-speedometer2 me-1"></i>Trang quản trị (Dashboard)
                                     </a>
                                 </li>
@@ -60,7 +60,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
                                     @if (User.IsInRole("Admin") || User.IsInRole("quan_tri"))
                                     {
-                                        <li><a class="dropdown-item fw-semibold text-primary" asp-controller="AdminMember" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>Bảng điều khiển (Dashboard)</a></li>
+                                        <li><a class="dropdown-item fw-semibold text-primary" asp-controller="AdminMember" asp-action="BangQuanTri"><i class="bi bi-speedometer2 me-2"></i>Bảng điều khiển (Dashboard)</a></li>
                                         <li><a class="dropdown-item" asp-controller="AdminMember" asp-action="HoSoChoDuyet"><i class="bi bi-shield-check me-2"></i>Xét duyệt hồ sơ</a></li>
                                         <li><a class="dropdown-item" asp-controller="AdminMember" asp-action="DanhSachHoiVien"><i class="bi bi-people me-2"></i>Danh sách hội viên</a></li>
                                         <li><a class="dropdown-item" asp-controller="Post" asp-action="ThemTinTuc"><i class="bi bi-pencil-square me-2"></i>Đăng bài viết mới</a></li>

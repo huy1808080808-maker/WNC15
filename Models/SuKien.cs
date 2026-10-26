@@ -47,7 +47,7 @@ namespace WNC15.Models
 
         // Navigation properties
         [ForeignKey(nameof(MaNguoiTao))]
-        public virtual NguoiDung? NguoiTao { get; set; }
+        public virtual NguoiDung NguoiTao { get; set; }
 
         public virtual ICollection<DangKySuKien> DangKySuKiens { get; set; } = new List<DangKySuKien>();
     }
