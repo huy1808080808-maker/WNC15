@@ -63,7 +63,7 @@ namespace WNC15.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ChinhSua(string fullName, string phoneNumber, string address, string jobTitle, string introduction)
+        public IActionResult ChinhSua(string fullName, string phoneNumber, string address, string jobTitle, string introduction, IFormFile avatar)
         {
             var nguoiDung = LayNguoiDungHienTai();
             if (nguoiDung == null)
@@ -78,10 +78,36 @@ namespace WNC15.Controllers
             }
 
             nguoiDung.HoTen = fullName.Trim();
-            nguoiDung.SoDienThoai = phoneNumber?.Trim();
-            nguoiDung.DonViCongTac = address?.Trim();
-            nguoiDung.ChucDanh = jobTitle?.Trim();
-            nguoiDung.GioiThieu = introduction?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                nguoiDung.SoDienThoai = phoneNumber.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(address))
+            {
+                nguoiDung.DonViCongTac = address.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(jobTitle))
+            {
+                nguoiDung.ChucDanh = jobTitle.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(introduction))
+            {
+                nguoiDung.GioiThieu = introduction.Trim();
+            }
+
+            // Xử lý lưu ảnh đại diện nếu có tải lên
+            if (avatar != null && avatar.Length > 0)
+            {
+                string duongDanAnh = LuuAnhDaiDien(avatar);
+                if (!string.IsNullOrEmpty(duongDanAnh))
+                {
+                    nguoiDung.AnhDaiDien = duongDanAnh;
+                }
+            }
 
             _context.SaveChanges();
 
@@ -199,6 +225,40 @@ namespace WNC15.Controllers
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Lưu file ảnh đại diện vào thư mục wwwroot/uploads/avatars/
+        /// </summary>
+        private string LuuAnhDaiDien(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return "";
+            }
+
+            try
+            {
+                var thuMucUpload = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                if (!Directory.Exists(thuMucUpload))
+                {
+                    Directory.CreateDirectory(thuMucUpload);
+                }
+
+                var tenFile = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                var duongDanVatLy = Path.Combine(thuMucUpload, tenFile);
+
+                using (var stream = new FileStream(duongDanVatLy, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                return "/uploads/avatars/" + tenFile;
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         #endregion

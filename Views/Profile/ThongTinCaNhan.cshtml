@@ -1,4 +1,4 @@
-﻿@model WNC15.Models.NguoiDung
+@model WNC15.Models.NguoiDung
 @{
     ViewData["Title"] = "Hồ sơ cá nhân";
     var hoTen = Model != null ? Model.HoTen : "Hội viên";
@@ -36,9 +36,20 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4 text-center p-4">
                     <div class="mb-3">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-4 shadow-sm">
-                            <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
-                        </div>
+                        @if (Model != null && !string.IsNullOrEmpty(Model.AnhDaiDien))
+                        {
+                            <img src="@Model.AnhDaiDien" 
+                                 alt="@hoTen" 
+                                 class="rounded-circle shadow-sm border" 
+                                 style="width: 130px; height: 130px; object-fit: cover;" 
+                                 onerror="this.src='https://placehold.co/130x130?text=Avatar';" />
+                        }
+                        else
+                        {
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-4 shadow-sm">
+                                <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+                            </div>
+                        }
                     </div>
                     <h5 class="fw-bold text-dark mb-1">@hoTen</h5>
                     <p class="text-muted small mb-3">@chucDanh</p>
