@@ -29,9 +29,13 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Chuyên mục tin tức <span class="text-danger">*</span></label>
                             <select name="categoryId" class="form-select" required>
-                                <option value="1">Nghiên cứu & Công nghệ</option>
-                                <option value="2">Thông báo Hiệp hội</option>
-                                <option value="3">Sinh hoạt Hội viên</option>
+                                @{
+                                    var dsDanhMuc = ViewBag.DanhMucs as IEnumerable<WNC15.Models.DanhMuc> ?? new List<WNC15.Models.DanhMuc>();
+                                    foreach (var dm in dsDanhMuc)
+                                    {
+                                        <option value="@dm.MaDanhMuc">@dm.TenDanhMuc</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-6">

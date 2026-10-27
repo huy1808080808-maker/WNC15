@@ -62,6 +62,7 @@ namespace WNC15.Controllers
 
             ViewBag.Search = search;
             ViewBag.CategoryId = categoryId;
+            ViewBag.DanhMucs = _context.DanhMucs.OrderBy(d => d.TenDanhMuc).ToList();
 
             return View(danhSach);
         }
@@ -108,6 +109,7 @@ namespace WNC15.Controllers
         [Authorize(Roles = "Admin,quan_tri")]
         public IActionResult ThemTinTuc()
         {
+            ViewBag.DanhMucs = _context.DanhMucs.OrderBy(d => d.TenDanhMuc).ToList();
             return View();
         }
 
@@ -123,6 +125,7 @@ namespace WNC15.Controllers
             if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
             {
                 ModelState.AddModelError("", "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết!");
+                ViewBag.DanhMucs = _context.DanhMucs.OrderBy(d => d.TenDanhMuc).ToList();
                 return View();
             }
 
@@ -184,6 +187,7 @@ namespace WNC15.Controllers
                 TempData["ErrorMessage"] = "Không tìm thấy bài viết cần chỉnh sửa!";
                 return RedirectToAction(nameof(DanhSachTinTuc));
             }
+            ViewBag.DanhMucs = _context.DanhMucs.OrderBy(d => d.TenDanhMuc).ToList();
             return View(baiViet);
         }
 
@@ -206,6 +210,7 @@ namespace WNC15.Controllers
             if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
             {
                 ModelState.AddModelError("", "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết!");
+                ViewBag.DanhMucs = _context.DanhMucs.OrderBy(d => d.TenDanhMuc).ToList();
                 return View(baiViet);
             }
 

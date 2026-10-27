@@ -37,9 +37,13 @@
                 <div class="col-md-3">
                     <select class="form-select bg-light" name="categoryId">
                         <option value="0">Tất cả chuyên mục</option>
-                        <option value="1" selected="@(maDanhMuc == 1)">Nghiên cứu & Công nghệ</option>
-                        <option value="2" selected="@(maDanhMuc == 2)">Thông báo Hiệp hội</option>
-                        <option value="3" selected="@(maDanhMuc == 3)">Sinh hoạt Hội viên</option>
+                        @{
+                            var dsDanhMuc = ViewBag.DanhMucs as IEnumerable<WNC15.Models.DanhMuc> ?? new List<WNC15.Models.DanhMuc>();
+                            foreach (var dm in dsDanhMuc)
+                            {
+                                <option value="@dm.MaDanhMuc" selected="@(maDanhMuc == dm.MaDanhMuc)">@dm.TenDanhMuc</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="col-md-2 d-grid">

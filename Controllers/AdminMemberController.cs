@@ -348,7 +348,105 @@ namespace WNC15.Controllers
 
         #endregion
 
-        #region 5. PHƯƠNG THỨC HỖ TRỢ DÙNG CHUNG
+        #region 5. QUẢN LÝ DANH MỤC BÀI VIẾT (R06)
+
+        /// <summary>
+        /// Danh sách danh mục bài viết kèm số lượng bài viết tương ứng.
+        /// GET: /AdminMember/QuanLyDanhMuc
+        /// </summary>
+        [HttpGet]
+        public IActionResult QuanLyDanhMuc()
+        {
+            var dsDanhMuc = _context.DanhMucs
+                                    .Include(d => d.BaiViets)
+                                    .OrderBy(d => d.MaDanhMuc)
+                                    .ToList();
+
+            return View(dsDanhMuc);
+        }
+
+        /// <summary>
+        /// Thêm danh mục bài viết mới.
+        /// POST: /AdminMember/ThemDanhMuc (Hỗ trợ AJAX & Form)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ThemDanhMuc(string tenDanhMuc, string? moTa)
+        {
+            tenDanhMuc = tenDanhMuc?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(tenDanhMuc))
+                return TraVeLoiDanhMuc("Tên danh mục không được để trống!");
+
+            if (_context.DanhMucs.Any(d => d.TenDanhMuc.ToLower() == tenDanhMuc.ToLower()))
+                return TraVeLoiDanhMuc("Tên danh mục này đã tồn tại trong hệ thống!");
+
+            var dm = new DanhMuc
+            {
+                TenDanhMuc = tenDanhMuc,
+                MoTa = string.IsNullOrWhiteSpace(moTa) ? null : moTa.Trim()
+            };
+
+            _context.DanhMucs.Add(dm);
+            _context.SaveChanges();
+
+            return TraVeThanhCongDanhMuc($"Đã thêm thành công danh mục: {dm.TenDanhMuc}", dm);
+        }
+
+        /// <summary>
+        /// Cập nhật tên và mô tả danh mục.
+        /// POST: /AdminMember/SuaDanhMuc (Hỗ trợ AJAX & Form)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SuaDanhMuc(int id, string tenDanhMuc, string? moTa)
+        {
+            var dm = _context.DanhMucs.Find(id);
+            if (dm == null)
+                return TraVeLoiDanhMuc("Không tìm thấy danh mục cần sửa!");
+
+            tenDanhMuc = tenDanhMuc?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(tenDanhMuc))
+                return TraVeLoiDanhMuc("Tên danh mục không được để trống!");
+
+            if (_context.DanhMucs.Any(d => d.MaDanhMuc != id && d.TenDanhMuc.ToLower() == tenDanhMuc.ToLower()))
+                return TraVeLoiDanhMuc("Tên danh mục đã trùng với một danh mục khác!");
+
+            dm.TenDanhMuc = tenDanhMuc;
+            dm.MoTa = string.IsNullOrWhiteSpace(moTa) ? null : moTa.Trim();
+            _context.SaveChanges();
+
+            return TraVeThanhCongDanhMuc($"Đã cập nhật danh mục: {dm.TenDanhMuc}", dm);
+        }
+
+        /// <summary>
+        /// Xóa danh mục bài viết.
+        /// POST: /AdminMember/XoaDanhMuc (Hỗ trợ AJAX & Form)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult XoaDanhMuc(int id)
+        {
+            var dm = _context.DanhMucs.Include(d => d.BaiViets).FirstOrDefault(d => d.MaDanhMuc == id);
+            if (dm == null)
+                return TraVeLoiDanhMuc("Không tìm thấy danh mục cần xóa!");
+
+            if (dm.BaiViets.Any())
+                return TraVeLoiDanhMuc($"Danh mục '{dm.TenDanhMuc}' đang chứa {dm.BaiViets.Count} bài viết, không thể xóa!");
+
+            if (_context.DanhMucs.Count() <= 1)
+                return TraVeLoiDanhMuc("Không thể xóa danh mục cuối cùng của hệ thống!");
+
+            string tenCu = dm.TenDanhMuc;
+            _context.DanhMucs.Remove(dm);
+            _context.SaveChanges();
+
+            return TraVeThanhCongDanhMuc($"Đã xóa danh mục '{tenCu}' thành công!", new { id });
+        }
+
+        #endregion
+
+        #region 6. PHƯƠNG THỨC HỖ TRỢ DÙNG CHUNG
 
         /// <summary>
         /// Kiểm tra yêu cầu gửi đến có phải là AJAX hay không.
@@ -357,6 +455,36 @@ namespace WNC15.Controllers
         {
             return Request.Headers["X-Requested-With"] == "XMLHttpRequest"
                 || Request.Headers.Accept.ToString().Contains("application/json");
+        }
+
+        /// <summary>
+        /// Phản hồi lỗi thống nhất cho chức năng Danh mục (hỗ trợ cả AJAX và Redirect).
+        /// </summary>
+        private IActionResult TraVeLoiDanhMuc(string message)
+        {
+            if (IsAjaxRequest())
+                return Json(new { success = false, message });
+
+            TempData["ErrorMessage"] = message;
+            return RedirectToAction(nameof(QuanLyDanhMuc));
+        }
+
+        /// <summary>
+        /// Phản hồi thành công thống nhất cho chức năng Danh mục (hỗ trợ cả AJAX và Redirect).
+        /// </summary>
+        private IActionResult TraVeThanhCongDanhMuc(string message, object? data = null)
+        {
+            if (IsAjaxRequest())
+            {
+                if (data is DanhMuc dm)
+                {
+                    return Json(new { success = true, message, id = dm.MaDanhMuc, ten = dm.TenDanhMuc, moTa = dm.MoTa ?? "" });
+                }
+                return Json(new { success = true, message });
+            }
+
+            TempData["SuccessMessage"] = message;
+            return RedirectToAction(nameof(QuanLyDanhMuc));
         }
 
         #endregion

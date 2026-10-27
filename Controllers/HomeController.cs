@@ -8,7 +8,7 @@ namespace WNC15.Controllers
     // Controller quản lý Trang chủ và các trang cơ bản
     public class HomeController : Controller
     {
-        // Biến lưu ngữ cảnh CSDL, không dùng readonly
+        // Biến lưu ngữ cảnh CSDL
         private ApplicationDbContext _context;
 
         public HomeController(ApplicationDbContext context)
