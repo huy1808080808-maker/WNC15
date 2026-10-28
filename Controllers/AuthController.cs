@@ -50,8 +50,10 @@ namespace WNC15.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DangNhap(string emailOrUsername, string password, bool rememberMe, string returnUrl)
+        public async Task<IActionResult> DangNhap(string emailOrUsername, string password, bool rememberMe, string returnUrl)
         {
+            ViewBag.ReturnUrl = returnUrl;
+
             // BƯỚC 1: Kiểm tra tính hợp lệ của dữ liệu đầu vào
             if (string.IsNullOrWhiteSpace(emailOrUsername) || string.IsNullOrWhiteSpace(password))
             {
@@ -60,14 +62,15 @@ namespace WNC15.Controllers
                 return View();
             }
 
-            // BƯỚC 2: Tìm kiếm người dùng linh hoạt trong CSDL
+            // BƯỚC 2: Tìm kiếm người dùng trong CSDL:
+            // - Hội viên thông thường: Đăng nhập bằng Email đầy đủ hoặc Tên đăng nhập (tiền tố trước dấu @ của Email).
+            // - Quản trị viên (Admin): Ngoài Email và Tên đăng nhập, chỉ riêng Admin mới có thể đăng nhập bằng chữ "admin" hoặc Số điện thoại.
             string taiKhoanNhap = emailOrUsername.Trim().ToLower();
 
             var nguoiDung = _context.NguoiDungs
                                     .FirstOrDefault(u => u.Email.ToLower() == taiKhoanNhap 
-                                                      || (taiKhoanNhap == "admin" && u.VaiTro == "quan_tri")
                                                       || u.Email.ToLower().StartsWith(taiKhoanNhap + "@")
-                                                      || (u.SoDienThoai != null && u.SoDienThoai == taiKhoanNhap));
+                                                      || (u.VaiTro == "quan_tri" && (taiKhoanNhap == "admin" || (u.SoDienThoai != null && u.SoDienThoai == taiKhoanNhap))));
 
             if (nguoiDung == null)
             {
@@ -115,7 +118,7 @@ namespace WNC15.Controllers
             var principal = new ClaimsPrincipal(identity);
             var authProperties = new AuthenticationProperties { IsPersistent = rememberMe };
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 
             TempData["SuccessMessage"] = $"Đăng nhập thành công! Xin chào {nguoiDung.HoTen}.";
 
@@ -208,9 +211,9 @@ namespace WNC15.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DangXuat()
+        public async Task<IActionResult> DangXuat()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             TempData["SuccessMessage"] = "Bạn đã đăng xuất khỏi hệ thống an toàn.";
             return RedirectToAction("Index", "Home");
         }

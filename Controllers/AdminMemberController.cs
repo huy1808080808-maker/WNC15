@@ -348,7 +348,7 @@ namespace WNC15.Controllers
 
         #endregion
 
-        #region 5. QUẢN LÝ DANH MỤC BÀI VIẾT (R06)
+        #region 5. QUẢN LÝ DANH MỤC BÀI VIẾT 
 
         /// <summary>
         /// Danh sách danh mục bài viết kèm số lượng bài viết tương ứng.
