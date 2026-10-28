@@ -160,31 +160,45 @@ namespace WNC15.Controllers
                                     string fullName, string phoneNumber, string address,
                                     string jobTitle, string researchField, string introduction)
         {
-            // 1. Kiểm tra mật khẩu xác nhận
+            // 1. Kiểm tra toàn bộ các trường bắt buộc (*)
+            if (string.IsNullOrWhiteSpace(fullName) ||
+                string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(phoneNumber) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                ModelState.AddModelError("", "Vui lòng điền đầy đủ các thông tin bắt buộc (*): Họ tên, Email, Số điện thoại và Mật khẩu!");
+                return View();
+            }
+
+            // 2. Kiểm tra độ dài mật khẩu tối thiểu
+            if (password.Length < 6)
+            {
+                ModelState.AddModelError("", "Mật khẩu khởi tạo phải có độ dài tối thiểu từ 6 ký tự trở lên!");
+                return View();
+            }
+
+            // 3. Kiểm tra mật khẩu xác nhận
             if (password != confirmPassword)
             {
                 ModelState.AddModelError("", "Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!");
                 return View();
             }
 
-            // 2. Kiểm tra trùng lặp email
-            if (!string.IsNullOrWhiteSpace(email))
+            // 4. Kiểm tra trùng lặp email (Tối ưu Index SQL Server, so khớp trực tiếp)
+            email = email.Trim().ToLower();
+            if (_context.NguoiDungs.Any(u => u.Email == email))
             {
-                email = email.Trim();
-                if (_context.NguoiDungs.Any(u => u.Email == email))
-                {
-                    ModelState.AddModelError("", "Hòm thư điện tử (Email) này đã được sử dụng trên hệ thống!");
-                    return View();
-                }
+                ModelState.AddModelError("", "Hòm thư điện tử (Email) này đã được sử dụng trên hệ thống!");
+                return View();
             }
 
-            // 3. Khởi tạo đối tượng hội viên mới với mật khẩu băm BCrypt
+            // 5. Khởi tạo đối tượng hội viên mới với mật khẩu băm BCrypt an toàn
             var hoiVienMoi = new NguoiDung
             {
-                HoTen = fullName?.Trim() ?? "Ứng viên mới",
+                HoTen = fullName.Trim(),
                 Email = email,
                 MatKhauMaHoa = BCrypt.Net.BCrypt.HashPassword(password),
-                SoDienThoai = phoneNumber?.Trim(),
+                SoDienThoai = phoneNumber.Trim(),
                 DonViCongTac = address?.Trim(),
                 ChucDanh = jobTitle?.Trim(),
                 LinhVuc = researchField?.Trim(),
