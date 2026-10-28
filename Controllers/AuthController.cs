@@ -68,7 +68,7 @@ namespace WNC15.Controllers
             string taiKhoanNhap = emailOrUsername.Trim().ToLower();
 
             var nguoiDung = _context.NguoiDungs
-                                    .FirstOrDefault(u => u.Email.ToLower() == taiKhoanNhap 
+                                    .FirstOrDefault(u => u.Email.ToLower() == taiKhoanNhap
                                                       || u.Email.ToLower().StartsWith(taiKhoanNhap + "@")
                                                       || (u.VaiTro == "quan_tri" && (taiKhoanNhap == "admin" || (u.SoDienThoai != null && u.SoDienThoai == taiKhoanNhap))));
 
